@@ -41,6 +41,21 @@ def find_by_id(curr_id, collection_name):
     # print(result)
     return result
 
+def get_movie_by_country(country):
+    curr_db = connect_db()
+    pipeline = [
+       { "$match": { "country": country } },
+       { "$group": { "_id": "$director", "total": { "$sum": 1 } } },
+       { "$sort": { "total": -1} }
+    ]
+    cursor = curr_db["Movies"].aggregate(pipeline)
+    # print(cursor.count())
+    result = []
+    for document in cursor:
+        result.append(document)
+    print(len(result))
+    return result
+
 def update_data(curr_id, new_data, collection_name):
     """
     Update current document by id
