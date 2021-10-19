@@ -59,6 +59,7 @@ def get_or_put_rating_vote():
 def get_movies_by_conditions():
     """
     GET: /ratings?country={country}&year={year}&avg_vote={lower_bound},{upper_bound}&genre={genre}
+
     :return: status code and message
     """
     country = request.args.get('country', None)
@@ -77,6 +78,7 @@ def get_movies_by_conditions():
 def group_movies_by_countries():
     """
     GET: /countries, get total number of movies for each country
+
     :return: status code and message
     """
     result = database_mysql.group_movies_by_country()
