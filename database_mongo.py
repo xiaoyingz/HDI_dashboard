@@ -35,11 +35,7 @@ def find_by_id(curr_id, collection_name):
     # print(collection_name)
     cursor = curr_db[collection_name].find({"imdb_title_id": "tt0000009"}, {"_id": False})
     # print(cursor.count())
-    result = []
-    for document in cursor:
-        result.append(document)
-    # print(result)
-    return result
+    return cursor_to_list(cursor)
 
 def get_movie_by_country(country):
     curr_db = connect_db()
@@ -50,11 +46,16 @@ def get_movie_by_country(country):
     ]
     cursor = curr_db["Movies"].aggregate(pipeline)
     # print(cursor.count())
-    result = []
-    for document in cursor:
-        result.append(document)
-    print(len(result))
-    return result
+    return cursor_to_list(cursor)
+
+def group_movie_by_country():
+    curr_db = connect_db()
+    pipeline = [
+       { "$group": { "_id": "$country", "total": { "$sum": 1 } } },
+       { "$sort": { "total": -1} }
+    ]
+    cursor = curr_db["Movies"].aggregate(pipeline)
+    return cursor_to_list(cursor)
 
 def update_data(curr_id, new_data, collection_name):
     """
@@ -85,3 +86,13 @@ def update_data(curr_id, new_data, collection_name):
         return 2
     except:
         return 3
+
+def cursor_to_list(cursor):
+    result = []
+    for document in cursor:
+        result.append(document)
+    # print(result)
+    return result
+
+if __name__ == "__main__":
+    print(group_movie_by_country())
