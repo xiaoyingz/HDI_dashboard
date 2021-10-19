@@ -58,7 +58,7 @@ def get_or_put_rating_vote():
 @app.route(rule='/movies', methods=['GET'])
 def get_movies_by_conditions():
     """
-    GET: /ratings?country={country}&year={year}&avg_vote={avg_vote}&genre={genre}
+    GET: /ratings?country={country}&year={year}&avg_vote={lower_bound},{upper_bound}&genre={genre}
 
     :return: status code and message
     """
@@ -71,6 +71,17 @@ def get_movies_by_conditions():
         avg_vote = tuple([int(item) for item in avg_vote.split(',')])
     genre = request.args.get("genre", None)
     result = database_mysql.get_movies(country=country, year=year, avg_vote=avg_vote, genre=genre)
+    return jsonify(result), 200
+
+
+@app.route(rule='/countries', methods=['GET'])
+def group_movies_by_countries():
+    """
+    GET: /countries, get total number of movies for each country
+
+    :return: status code and message
+    """
+    result = database_mysql.group_movies_by_country()
     return jsonify(result), 200
 
 
