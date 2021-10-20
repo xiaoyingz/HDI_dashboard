@@ -38,21 +38,21 @@ def get_movies(country=None, year=None, avg_vote=None, genre=None):
 
 
 def group_movies_by_country():
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
     cursor = cnx.cursor()
     query = ("SELECT country, COUNT(imdb_title_id) FROM movie "
              "GROUP BY country")
     cursor.execute(query)
-    counter = {}
+    counter = []
     for country, count in cursor:
-        counter[country] = count
+        counter.append({'_id': country, 'total': count})
     cursor.close()
     cnx.close()
     return counter
 
 
 if __name__ == '__main__':
-    movies = get_movies(country='China', year=2010, genre="Drama", avg_vote=(6, 8))
-    print(movies)
+    # movies = get_movies(country='China', year=2010, genre="Drama", avg_vote=(6, 8))
+    # print(movies)
     counter = group_movies_by_country()
     print(counter)
