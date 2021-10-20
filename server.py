@@ -1,3 +1,4 @@
+
 import requests
 import json
 # import database, scrap, schema, query_parser
@@ -26,7 +27,6 @@ def get_or_put_rating_vote():
     GET: /ratings?id={id}, find rating count by movie's title id
     PUT: /ratings?id={id}, data is stored in json of request,
          update vote for rating by movie's title id
-
     :return: status code and message
     """
     title_id = check_id(request)
@@ -88,7 +88,6 @@ def group_movies_by_countries():
 def check_content_type(request):
     """
     Helper to check content type of request
-
     :param request: request need to be checked
     :return: no return value
     """
@@ -100,7 +99,6 @@ def check_id(curr_request):
     """
     Helper to check if a request contains id attribute
     :param curr_request: current request that is assumed to have id attribute
-
     :return: id if contains, abort otherwise
     """
     curr_id = curr_request.args.get('id', None)
