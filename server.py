@@ -126,6 +126,5 @@ def not_found(error):
 def invalid_content_type(error):
     return make_response(jsonify({'message': "Data must be JSON."}), 415)
 
-
 if __name__ == '__main__':
     app.run()

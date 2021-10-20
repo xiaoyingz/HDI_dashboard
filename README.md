@@ -8,6 +8,7 @@ Python 3.8.5
 - pymongo
 - dotenv
 - neo4j
+- mysql-connector-python
 ## Compile
 To start the dashboard, run:
 ```

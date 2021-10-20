@@ -50,9 +50,80 @@ def group_movies_by_country():
     cnx.close()
     return counter
 
+def group_movies_by_genre(country):
+    #group by genre, given country   ->{genre:num}
+    cnx = mysql.connector.connect(user='root', database='mp')
+    cursor = cnx.cursor()
+    query = ("SELECT genre, COUNT(imdb_title_id) FROM movie "
+             "WHERE country = %s "
+             "GROUP BY genre ")
+    cursor.execute(query, (country,))
+    counter = {}
+    for genre, count in cursor:
+        counter[genre] = count
+    cursor.close()
+    cnx.close()
+    return counter
+
+def get_id_by_name(movie_title, original=True):
+    """
+    :param movie_title: the title of movie
+    :param original: whether use title or original_title, default is using original_title
+    :return: dict {field_name:val} movie information
+    """
+    cnx = mysql.connector.connect(user='root', database='mp')
+    cursor = cnx.cursor()
+    if original:
+        query = ("SELECT * FROM movie "
+                "WHERE original_title = %s ")
+    else:
+        query = ("SELECT * FROM movie "
+                 "WHERE title = %s ")
+    cursor.execute(query, (movie_title,))
+    fields = [i[0] for i in cursor.description]
+    res = None
+    for item in cursor:
+        res = dict(zip(fields, item))
+        break
+    cursor.close()
+    cnx.close()
+    return res
+
+def update_avg_vote(movie_id, avg_vote):
+    """
+    update the average voting of a movie given movie_id
+    :return: updated data {movie_id:{}, avg_vote:{}}
+    """
+    cnx = mysql.connector.connect(user='root', database='mp')
+    cursor = cnx.cursor()
+    query = ("UPDATE movie "
+             "SET avg_vote = %s "
+             "WHERE imdb_title_id = %s ")
+    cursor.execute(query, (avg_vote, movie_id))
+    query = ("SELECT imdb_title_id, avg_vote FROM movie "
+             "WHERE imdb_title_id = %s ")
+    cursor.execute(query, (movie_id,))
+    fields = [i[0] for i in cursor.description]
+    res = None
+    for item in cursor:
+        res = dict(zip(fields, item))
+        break
+    cursor.close()
+    cnx.close()
+    if res is None or res['imdb_title_id'] != movie_id or res['avg_vote'] != avg_vote:
+        return -1
+    return res
 
 if __name__ == '__main__':
     # movies = get_movies(country='China', year=2010, genre="Drama", avg_vote=(6, 8))
     # print(movies)
     counter = group_movies_by_country()
-    print(counter)
+    #print(counter)
+    counter = group_movies_by_genre('China')
+    #print(counter)
+    movie = get_id_by_name('Biancaneve e i sette nani', False)
+    #print(movie)
+    movie = get_id_by_name('Snow White and the Seven Dwarfs')
+    #print(movie)
+    info = update_avg_vote("tt0027977", 8.0)
+    print(info)
