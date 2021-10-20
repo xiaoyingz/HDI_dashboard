@@ -33,7 +33,7 @@ def find_by_id(curr_id, collection_name):
     # print(curr_db[collection_name].count())
     # print(type(curr_id))
     # print(collection_name)
-    cursor = curr_db[collection_name].find({"imdb_title_id": "tt0000009"}, {"_id": False})
+    cursor = curr_db[collection_name].find({"_id": curr_id}, {"_id": False})
     # print(cursor.count())
     return cursor_to_list(cursor)
 
@@ -57,35 +57,45 @@ def group_movie_by_country():
     cursor = curr_db["Movies"].aggregate(pipeline)
     return cursor_to_list(cursor)
 
-def update_data(curr_id, new_data, collection_name):
+def update_rating(curr_id, vote, collection_name='Ratings'):
     """
     Update current document by id
 
     :param curr_id: id of target document
-    :param new_data: new newValue to update
+    :param vote: new newValue to update
     :param collection_name: name of target collection
-    :return: 1 for no matched newValue, 0 for updated, 2 for updating error
+    :return: -1 for errors, otherwise newly calculated mean_vote
     """
     curr_db = connect_db()
-    cursor = curr_db[collection_name].find({'imdb_title_id': curr_id})
-    print(curr_id)
+    cursor = curr_db[collection_name].find({'_id': curr_id})
     if cursor.count() == 0:
-        return 1
+        print("no such id")
+        return -1
     try:
-        processed_data = {}
-        for key, value in list(new_data.items()):
-            if key in INT_ATTRI:
-                processed_data[key] = int(value)
-            elif key in DOUBLE_ATTRI:
-                # print("value", value)
-                processed_data[key] = float(value)
-        print("processed:", processed_data)
-        curr_db[collection_name].update_one(filter={'imdb_title_id': curr_id}, update={'$set': processed_data})
-        return 0
+        vote_num = int(vote)
+        if vote_num <= 0 or vote_num > 10:
+            print("invalid vote number")
+            return -1
+
+        field = 'votes_'+vote
+        curr_record = cursor_to_list(cursor)[0]
+
+        prev_total = curr_record['total_votes']
+        new_votes = curr_record[field]+1
+        new_sum = curr_record['mean_vote']*prev_total+vote_num
+        new_total = prev_total+1
+        new_mean = float(format(new_sum/new_total, ".1f"))
+
+        update_data = {'mean_vote': new_mean, 'total_votes': new_total, field: new_votes}
+        print("processed:", update_data)
+        curr_db[collection_name].update_one(filter={'_id': curr_id}, update={'$set': update_data})
+        return new_mean
+    except ValueError:
+        print("invalid format of vote")
+        return -1
     except pymongo.errors.WriteError:
-        return 2
-    except:
-        return 3
+        print("WriteError")
+        return -1
 
 def cursor_to_list(cursor):
     result = []
@@ -95,4 +105,4 @@ def cursor_to_list(cursor):
     return result
 
 if __name__ == "__main__":
-    print(group_movie_by_country())
+    print(update_rating("tt0000009", '10'))
