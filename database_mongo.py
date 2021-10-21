@@ -22,7 +22,7 @@ def connect_db():
     print("connected")
     return client["Movies"]
 
-def find_by_id(curr_id, collection_name):
+def find_by_id(curr_id, collection_name='Ratings'):
     """
     Find rating by title_id.
 
@@ -77,18 +77,26 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
             print("invalid vote number")
             return -1
 
-        field = 'votes_'+vote
+        field = 'votes_'+str(vote)
+        print("field", field)
         curr_record = cursor_to_list(cursor)[0]
 
-        prev_total = curr_record['total_votes']
+        # prev_total = curr_record['total_votes']
+        # print("prev_total", prev_total)
         new_votes = curr_record[field]+1
-        new_sum = curr_record['mean_vote']*prev_total+vote_num
-        new_total = prev_total+1
+        # new_sum = curr_record['mean_vote']*prev_total+vote_num
+        # new_total = prev_total+1
+        # new_mean = float(format(new_sum/new_total, ".1f"))
+        # print("mean", new_total, new_sum/new_total)
+        new_total = curr_record['total_votes']+1
+        prev_sum = calculate_sum(curr_record)
+        new_sum = prev_sum + 1
+        print("raw", new_sum/new_total)
         new_mean = float(format(new_sum/new_total, ".1f"))
-
         update_data = {'mean_vote': new_mean, 'total_votes': new_total, field: new_votes}
         print("processed:", update_data)
         curr_db[collection_name].update_one(filter={'_id': curr_id}, update={'$set': update_data})
+        # print("updated", find_by_id(curr_id))
         return new_mean
     except ValueError:
         print("invalid format of vote")
@@ -96,7 +104,12 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
     except pymongo.errors.WriteError:
         print("WriteError")
         return -1
-
+def calculate_sum(curr_record):
+    result = 0
+    for i in range(10, 0, -1):
+        field = 'votes_'+str(i)
+        result += curr_record[field]*i
+    return result
 def cursor_to_list(cursor):
     result = []
     for document in cursor:
@@ -105,4 +118,4 @@ def cursor_to_list(cursor):
     return result
 
 if __name__ == "__main__":
-    print(update_rating("tt0000009", '10'))
+    print(update_rating("tt0479042", 10))
