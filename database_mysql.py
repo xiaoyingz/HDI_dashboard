@@ -100,6 +100,7 @@ def update_avg_vote(movie_id, avg_vote):
              "SET avg_vote = %s "
              "WHERE imdb_title_id = %s ")
     cursor.execute(query, (avg_vote, movie_id))
+    cnx.commit()
     query = ("SELECT imdb_title_id, avg_vote FROM movie "
              "WHERE imdb_title_id = %s ")
     cursor.execute(query, (movie_id,))
@@ -125,5 +126,7 @@ if __name__ == '__main__':
     #print(movie)
     movie = get_id_by_name('Snow White and the Seven Dwarfs')
     #print(movie)
-    info = update_avg_vote("tt0027977", 8.0)
+    info = update_avg_vote("tt0027977", 9.0)
     print(info)
+    movie = get_id_by_name('Tempi moderni', False)
+    print(movie)
