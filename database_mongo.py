@@ -97,7 +97,12 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
         print("processed:", update_data)
         curr_db[collection_name].update_one(filter={'_id': curr_id}, update={'$set': update_data})
         # print("updated", find_by_id(curr_id))
-        return new_mean
+        updated = find_by_id(curr_id)[0]
+        votes = {}
+        for i in range(10, 0, -1):
+            field = 'votes_'+str(i)
+            votes[field] = updated[field]
+        return new_mean, votes
     except ValueError:
         print("invalid format of vote")
         return -1
