@@ -59,10 +59,11 @@ def group_movie_by_country():
 
 def get_votes_by_id(curr_id):
     updated = find_by_id(curr_id)[0]
-    votes = {}
+    votes = {'field': [], 'value':[]}
     for i in range(1, 11):
         field = 'votes_'+str(i)
-        votes[field] = updated[field]
+        votes['field'].append(field)
+        votes['value'].append(updated[field])
     return votes
 
 def update_rating(curr_id, vote, collection_name='Ratings'):
@@ -89,13 +90,8 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
         print("field", field)
         curr_record = cursor_to_list(cursor)[0]
 
-        # prev_total = curr_record['total_votes']
-        # print("prev_total", prev_total)
+
         new_votes = curr_record[field]+1
-        # new_sum = curr_record['mean_vote']*prev_total+vote_num
-        # new_total = prev_total+1
-        # new_mean = float(format(new_sum/new_total, ".1f"))
-        # print("mean", new_total, new_sum/new_total)
         new_total = curr_record['total_votes']+1
         prev_sum = calculate_sum(curr_record)
         new_sum = prev_sum + 1
@@ -104,7 +100,6 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
         update_data = {'mean_vote': new_mean, 'total_votes': new_total, field: new_votes}
         print("processed:", update_data)
         curr_db[collection_name].update_one(filter={'_id': curr_id}, update={'$set': update_data})
-        # print("updated", find_by_id(curr_id))
         return new_mean
     except ValueError:
         print("invalid format of vote")
