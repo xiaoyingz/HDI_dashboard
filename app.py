@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 import numpy as np
 from database_neo4j import App
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 filters=['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 def generate_table(country="China", year=2008, genre='Action', low=1, high=10, order='DESC'):
@@ -32,7 +32,7 @@ def generate_table(country="China", year=2008, genre='Action', low=1, high=10, o
             align='left')
         )
     ])
-    figure.update_layout(width=1900)
+    figure.update_layout(width=1900, margin=dict(l=20, r=20, t=20, b=20))
     return html.Div(className='scrollable', children=[
         str(len(data)) + " movies found.",
         dcc.Graph(
@@ -86,27 +86,33 @@ def generate_global():
     ))
     return global_fig
 
-
 app.layout = html.Div([
     html.Div(
-        id="world_div",
+        className="row",
         children=[
-            html.H3(
-                "Movies in the world:"
-            ),
-            dcc.Graph(
-                id='choropleth_chart',
-                figure=generate_global()
-    )]),
-    html.Div([
-        "Country: ",
-        dcc.Input(id='country_input', value='USA', type='text'),
-        html.Button(id='submit_state', children='Submit', n_clicks=0),
-        dcc.Graph(
-            id='pie_chart',
-            figure=generate_pie()
-        )
-    ]),
+            html.Div(
+                id="world_div",
+                className="six columns",
+                children=[
+                    html.H3(
+                        "Movies in the world:"
+                    ),
+                    dcc.Graph(
+                        id='choropleth_chart',
+                        figure=generate_global()
+            )]),
+            html.Div(
+                className="six columns",
+                children=[
+                    dcc.Graph(
+                        id='pie_chart',
+                        figure=generate_pie()
+                    ),
+                    "Country: ",
+                    dcc.Input(id='country_input', value='USA', type='text'),
+                    html.Button(id='submit_state', children='Submit', n_clicks=0)
+            ])]
+    ),
     html.H3("Give the name of the actor/director/producer/composer interests you!"),
     html.Div([
         "Actor/Director/Producer/Composer Name: ",
@@ -155,6 +161,7 @@ app.layout = html.Div([
         ]
     ),
     html.H3("Check the movie interests you!"),
+    html.Div(id='dummy1'),
     html.Div([
         "Movie Name: ",
         dcc.Input(id='input_movie', value='Million Dollar Baby', type='text')
@@ -164,10 +171,16 @@ app.layout = html.Div([
         dcc.Input(id='vote', value=0, type='number'),
         html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
     ]),
-    html.Div(id='dummy1'),
-    dcc.Graph(id='movie_table'),
-    html.H3("Vote Distribution"),
-    dcc.Graph(id="vote_distribution")
+    html.Div(className='row', children=[
+        html.Div(className='eight columns', children=[
+            html.H3("Movie details"),
+            dcc.Graph(id='movie_table')
+        ]),
+        html.Div(className='four columns', children=[
+            html.H3("Vote Distribution"),
+            dcc.Graph(id="vote_distribution")
+        ])
+    ])
 ])
 
 
@@ -238,7 +251,7 @@ def update_table(input_movie, n_clicks):
                 align='left')
             )
             ])
-        fig1.update_layout(width=1900)
+        fig1.update_layout(margin=dict(l=20, r=20, t=20, b=20))
     return fig1
 
 @app.callback(
@@ -254,6 +267,7 @@ def update_figure1(input_movie, dummy1):
         temp_id = temp_dict['imdb_title_id']
         data = database_mongo.get_votes_by_id(temp_id)
         fig =  px.bar(data, x="field", y="value")
+        fig.update_layout(margin=dict(l=0, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
     return fig
 
 

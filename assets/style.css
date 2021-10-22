@@ -1,7 +1,7 @@
-.my-cols{
+/* .my-cols{
   width: calc(100%/3);
   float: left;
-}
+} */
 
 /* The following formats the content whose id = sort_dropdown*/
 #sort_dropdown{
@@ -28,3 +28,7 @@
 Table{
   background-color: #bcccbc;
 } */
+#movie_table, #vote_distribution{
+  position: relative;
+  left: 0px;
+}
