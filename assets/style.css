@@ -10,9 +10,9 @@
   display: inline-block;
   vertical-align: middle;
 }
-#search_result{
+/* #search_result{
   height: auto;
-}
+} */
 /* Style all tabless*/
 /* table{
   width: 65%;
@@ -20,10 +20,11 @@
   overflow: scroll;
 } */
 
-div.scrollable{
+/* div.scrollable{
   height: 200px;
+  width: 1900px;
   overflow: scroll;
 }
 Table{
   background-color: #bcccbc;
-}
+} */

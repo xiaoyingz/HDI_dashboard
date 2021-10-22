@@ -1,12 +1,18 @@
+import os
 import mysql.connector
 from collections import defaultdict
+import dotenv
+from pathlib import Path
 
+dotenv_path = Path('/Users/zhuxiaoying/Desktop/cs511_project/.env')
+env = dotenv.load_dotenv(dotenv_path='/Users/zhuxiaoying/Desktop/cs511_project/.env', verbose=True, override=False)
+password=os.getenv('PASSWORD')
 
 def get_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC'):
     """
     :return: a list of dictionary with key as field name
     """
-    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
+    cnx = mysql.connector.connect(user='root', database='mp', password=password)
     cursor = cnx.cursor()
     query = "SELECT * FROM movie"
     conditions = []
@@ -39,7 +45,7 @@ def get_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC')
 
 
 def group_movies_by_country():
-    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
+    cnx = mysql.connector.connect(user='root', database='mp', password=password)
     cursor = cnx.cursor()
     query = ("SELECT country, COUNT(imdb_title_id) FROM movie "
              "GROUP BY country")
@@ -53,7 +59,7 @@ def group_movies_by_country():
 
 def group_movies_by_genre(country):
     #group by genre, given country   ->{genre:num}
-    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
+    cnx = mysql.connector.connect(user='root', database='mp', password=password)
     cursor = cnx.cursor()
     query = ("SELECT genre, COUNT(imdb_title_id) FROM movie "
              "WHERE country = %s "
@@ -72,7 +78,7 @@ def get_id_by_name(movie_title, original=True):
     :param original: whether use title or original_title, default is using original_title
     :return: dict {field_name:val} movie information
     """
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='mp', password=password)
     cursor = cnx.cursor()
     if original:
         query = ("SELECT * FROM movie "
@@ -95,7 +101,7 @@ def update_avg_vote(movie_id, avg_vote):
     update the average voting of a movie given movie_id
     :return: updated data {movie_id:{}, avg_vote:{}}
     """
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='mp', password=password)
     cursor = cnx.cursor()
     query = ("UPDATE movie "
              "SET avg_vote = %s "
