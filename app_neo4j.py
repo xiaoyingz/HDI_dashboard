@@ -26,12 +26,13 @@ app.layout = html.Div([
     ]),
     html.Div(id='dummy1'),
     dcc.Graph(id='movie_table'),
+    html.H3("Vote Distribution"),
+    dcc.Graph(id='vote_distribution'),
     html.H3("Give the name of the actor/director/producer/composer interests you!"),
     html.Div([
         "Actor/Director/Producer/Composer Name: ",
         dcc.Input(id='input_name', value='Clint Eastwood', type='text')
     ]),
-    
     dcc.Graph(id='graph-with-slider'),
     dcc.Slider(
         id='year-slider',
@@ -97,7 +98,20 @@ def update_table(input_movie, n_clicks):
         fig1.update_layout(width=1900)
     return fig1
 
+@app.callback(
+    Output('vote_distribution', 'figure'),
+    Input("input_movie", "value"),
+    Input("dummy1", "children"))
 
+def update_figure1(input_movie, dummy1):
+    temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+    if temp_dict==None:
+        fig =  px.bar()
+    else:
+        temp_id = temp_dict['imdb_title_id']
+        data = database_mongo.get_votes_by_id(temp_id)
+        fig =  px.bar(data, x="field", y="value")
+    return fig
 
 
 @app.callback(
@@ -121,6 +135,7 @@ def update_figure(selected_year, input_name, n_clicks):
     fig.update_layout(transition_duration=500)
 
     return fig
+
 
 
 if __name__ == '__main__':
