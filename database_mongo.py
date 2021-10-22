@@ -57,6 +57,14 @@ def group_movie_by_country():
     cursor = curr_db["Movies"].aggregate(pipeline)
     return cursor_to_list(cursor)
 
+def get_votes_by_id(curr_id):
+    updated = find_by_id(curr_id)[0]
+    votes = {}
+    for i in range(10, 0, -1):
+        field = 'votes_'+str(i)
+        votes[field] = updated[field]
+    return votes
+
 def update_rating(curr_id, vote, collection_name='Ratings'):
     """
     Update current document by id
@@ -97,24 +105,21 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
         print("processed:", update_data)
         curr_db[collection_name].update_one(filter={'_id': curr_id}, update={'$set': update_data})
         # print("updated", find_by_id(curr_id))
-        updated = find_by_id(curr_id)[0]
-        votes = {}
-        for i in range(10, 0, -1):
-            field = 'votes_'+str(i)
-            votes[field] = updated[field]
-        return new_mean, votes
+        return new_mean
     except ValueError:
         print("invalid format of vote")
         return -1
     except pymongo.errors.WriteError:
         print("WriteError")
         return -1
+
 def calculate_sum(curr_record):
     result = 0
     for i in range(10, 0, -1):
         field = 'votes_'+str(i)
         result += curr_record[field]*i
     return result
+
 def cursor_to_list(cursor):
     result = []
     for document in cursor:
@@ -123,4 +128,4 @@ def cursor_to_list(cursor):
     return result
 
 if __name__ == "__main__":
-    print(update_rating("tt0479042", 10))
+    print(get_votes_by_id("tt0479042"))
