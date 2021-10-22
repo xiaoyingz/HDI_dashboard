@@ -60,7 +60,7 @@ def group_movie_by_country():
 def get_votes_by_id(curr_id):
     updated = find_by_id(curr_id)[0]
     votes = {}
-    for i in range(10, 0, -1):
+    for i in range(1, 11):
         field = 'votes_'+str(i)
         votes[field] = updated[field]
     return votes
