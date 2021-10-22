@@ -2,11 +2,11 @@ import mysql.connector
 from collections import defaultdict
 
 
-def get_movies(country=None, year=None, avg_vote=None, genre=None):
+def get_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC'):
     """
     :return: a list of dictionary with key as field name
     """
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
     cursor = cnx.cursor()
     query = "SELECT * FROM movie"
     conditions = []
@@ -27,6 +27,7 @@ def get_movies(country=None, year=None, avg_vote=None, genre=None):
     if conditions:
         query += " WHERE "
         query += " AND ".join(conditions)
+    query += " ORDER BY avg_vote "+order
     cursor.execute(query, tuple(params))
     fields = [i[0] for i in cursor.description]
     res = []
@@ -52,7 +53,7 @@ def group_movies_by_country():
 
 def group_movies_by_genre(country):
     #group by genre, given country   ->{genre:num}
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='mp', password='zxy971215')
     cursor = cnx.cursor()
     query = ("SELECT genre, COUNT(imdb_title_id) FROM movie "
              "WHERE country = %s "
@@ -116,17 +117,18 @@ def update_avg_vote(movie_id, avg_vote):
     return res
 
 if __name__ == '__main__':
-    # movies = get_movies(country='China', year=2010, genre="Drama", avg_vote=(6, 8))
-    # print(movies)
-    counter = group_movies_by_country()
-    #print(counter)
-    counter = group_movies_by_genre('China')
-    #print(counter)
-    movie = get_id_by_name('Biancaneve e i sette nani', False)
-    #print(movie)
-    movie = get_id_by_name('Snow White and the Seven Dwarfs')
-    #print(movie)
-    info = update_avg_vote("tt0027977", 9.0)
-    print(info)
-    movie = get_id_by_name('Tempi moderni', False)
-    print(movie)
+    movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
+    print(movies)
+    # counter = group_movies_by_country()
+    # #print(counter)
+    # counter = group_movies_by_genre('China')
+    # #print(counter)
+    # movie = get_id_by_name('Biancaneve e i sette nani', False)
+    # #print(movie)
+    # movie = get_id_by_name('Snow White and the Seven Dwarfs')
+    # #print(movie)
+    # info = update_avg_vote("tt0027977", 9.0)
+    # print(info)
+    # movie = get_id_by_name('Tempi moderni', False)
+    # print(movie)
+    # print(get_movies(country='Brazil', year=1985, avg_vote=(5,8), genre='Drama'))

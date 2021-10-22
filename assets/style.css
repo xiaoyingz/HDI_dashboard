@@ -1,0 +1,29 @@
+.my-cols{
+  width: calc(100%/3);
+  float: left;
+}
+
+/* The following formats the content whose id = sort_dropdown*/
+#sort_dropdown{
+  width: 10%;
+  height: 50%;
+  display: inline-block;
+  vertical-align: middle;
+}
+#search_result{
+  height: auto;
+}
+/* Style all tabless*/
+/* table{
+  width: 65%;
+  height: 100%;
+  overflow: scroll;
+} */
+
+div.scrollable{
+  height: 200px;
+  overflow: scroll;
+}
+Table{
+  background-color: #bcccbc;
+}
