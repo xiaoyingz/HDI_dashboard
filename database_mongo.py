@@ -94,7 +94,7 @@ def update_rating(curr_id, vote, collection_name='Ratings', value=1):
         new_votes = curr_record[field]+value
         new_total = curr_record['total_votes']+value
         prev_sum = calculate_sum(curr_record)
-        new_sum = prev_sum+value
+        new_sum = prev_sum+value*vote_num
         print("raw", new_sum/new_total)
         new_mean = float(format(new_sum/new_total, ".1f"))
         update_data = {'mean_vote': new_mean, 'total_votes': new_total, field: new_votes}
