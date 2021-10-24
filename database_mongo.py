@@ -66,7 +66,7 @@ def get_votes_by_id(curr_id):
         votes['value'].append(updated[field])
     return votes
 
-def update_rating(curr_id, vote, collection_name='Ratings'):
+def update_rating(curr_id, vote, collection_name='Ratings', value=1):
     """
     Update current document by id
 
@@ -91,10 +91,10 @@ def update_rating(curr_id, vote, collection_name='Ratings'):
         curr_record = cursor_to_list(cursor)[0]
 
 
-        new_votes = curr_record[field]+1
-        new_total = curr_record['total_votes']+1
+        new_votes = curr_record[field]+value
+        new_total = curr_record['total_votes']+value
         prev_sum = calculate_sum(curr_record)
-        new_sum = prev_sum + 1
+        new_sum = prev_sum+value
         print("raw", new_sum/new_total)
         new_mean = float(format(new_sum/new_total, ".1f"))
         update_data = {'mean_vote': new_mean, 'total_votes': new_total, field: new_votes}
@@ -123,4 +123,5 @@ def cursor_to_list(cursor):
     return result
 
 if __name__ == "__main__":
-    print(get_votes_by_id("tt0479042"))
+    # print(get_votes_by_id("tt0479042"))
+    print(update_rating("tt0479042", 9, collection_name='Ratings', value=-1))
