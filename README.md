@@ -12,7 +12,9 @@ Python 3.8.5
 - mysql
 
 ## Set Up MySQL 
-
+1. Installed and started MySQL, reference to https://dev.mysql.com/doc/mysql-getting-started/en/git 
+2. Create the movie table, by copying CREATE statement in load_data.sql
+3. Import data from movie.csv to MySQL database using load command in load_data.sql
 
 ## Compile
 To start the dashboard, run:
