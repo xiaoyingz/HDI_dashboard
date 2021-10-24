@@ -9,6 +9,7 @@ Python 3.8.5
 - dotenv
 - neo4j
 - mysql-connector-python
+- mysql
 ## Compile
 To start the dashboard, run:
 ```
