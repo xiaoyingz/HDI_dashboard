@@ -23,8 +23,10 @@ app.layout = html.Div([
     html.Div([
         dcc.Input(id='vote', value=0, type='number'),
         html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
+        html.Button(id='revoke-button-state', n_clicks=0, children='Revoke'),
     ]),
     html.Div(id='dummy1'),
+    html.Div(id='dummy2'),
     dcc.Graph(id='movie_table'),
     html.H3("Vote Distribution"),
     dcc.Graph(id='vote_distribution'),
@@ -50,14 +52,14 @@ app.layout = html.Div([
     State("input_movie", "value"),
     State("vote", "value"),
     Input("submit-button-state", "n_clicks"))
-def update_table(input_movie, vote, n_clicks):
+def update_table(input_movie, vote, btn1):
     # print(n_clicks)
     # print(vote)
-    if n_clicks>0:
+    if btn1>0:
         temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
         if temp_dict!=None:
             temp_id = temp_dict['imdb_title_id']
-            new_rating = database_mongo.update_rating(temp_id, vote)
+            new_rating = database_mongo.update_rating(temp_id, vote,value = 1)
             res = database_mysql.update_avg_vote(temp_id, new_rating)
             print(res)
             app1 = App()
@@ -65,7 +67,26 @@ def update_table(input_movie, vote, n_clicks):
             app1.close()
     return None
 
-        
+@app.callback(
+    Output("dummy2", "children"),
+    State("input_movie", "value"),
+    State("vote", "value"),
+    Input("revoke-button-state", "n_clicks"))
+def update_table(input_movie, vote, btn2):
+    # print(n_clicks)
+    # print(vote)
+    if btn2>0:
+        temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+        if temp_dict!=None:
+            temp_id = temp_dict['imdb_title_id']
+            new_rating = database_mongo.update_rating(temp_id, vote,value = -1)
+            res = database_mysql.update_avg_vote(temp_id, new_rating)
+            print(res)
+            app1 = App()
+            app1.update_rating(temp_id, new_rating)
+            app1.close()
+    return None
+
     
     
 
@@ -73,8 +94,9 @@ def update_table(input_movie, vote, n_clicks):
 @app.callback(
     Output('movie_table', 'figure'),
     Input("input_movie", "value"),
-    Input("dummy1", "children"))
-def update_table(input_movie, n_clicks):
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
+def update_table(input_movie, n_clicks, adas):
     movie_dict = database_mysql.get_id_by_name("{}".format(input_movie))
     if movie_dict==None:
         fig1=go.Figure(go.Table(
@@ -101,9 +123,10 @@ def update_table(input_movie, n_clicks):
 @app.callback(
     Output('vote_distribution', 'figure'),
     Input("input_movie", "value"),
-    Input("dummy1", "children"))
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
 
-def update_figure1(input_movie, dummy1):
+def update_figure1(input_movie, dummy1,adfasf):
     temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
     if temp_dict==None:
         fig =  px.bar()
@@ -118,9 +141,10 @@ def update_figure1(input_movie, dummy1):
     Output('graph-with-slider', 'figure'),
     Input('year-slider', 'value'),
     Input("input_name", "value"),
-    Input("dummy1", "children"))
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
 
-def update_figure(selected_year, input_name, n_clicks):
+def update_figure(selected_year, input_name, n_clicks,adfds):
 
     app1 = App()
     df = app1.find_movie_from_person("{}".format(input_name))
