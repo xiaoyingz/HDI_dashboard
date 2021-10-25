@@ -86,6 +86,7 @@ def generate_global():
     ))
     return global_fig
 
+
 app.layout = html.Div([
     html.Div(
         className="row",
@@ -112,21 +113,6 @@ app.layout = html.Div([
                     dcc.Input(id='country_input', value='USA', type='text'),
                     html.Button(id='submit_state', children='Submit', n_clicks=0)
             ])]
-    ),
-    html.H3("Give the name of the actor/director/producer/composer interests you!"),
-    html.Div([
-        "Actor/Director/Producer/Composer Name: ",
-        dcc.Input(id='input_name', value='Clint Eastwood', type='text')
-    ]),
-    dcc.Graph(id='graph-with-slider'),
-    dcc.Slider(
-        id='year-slider',
-        min=1900,
-        max=2021,
-        value=1990,
-        marks={str(year): str(year) for year in range(1900,2021,10)},
-        step=None,
-        included=False
     ),
     html.H3(
         "Use filters to find movies:"
@@ -162,6 +148,7 @@ app.layout = html.Div([
     ),
     html.H3("Check the movie interests you!"),
     html.Div(id='dummy1'),
+    html.Div(id='dummy2'),
     html.Div([
         "Movie Name: ",
         dcc.Input(id='input_movie', value='Million Dollar Baby', type='text')
@@ -170,6 +157,7 @@ app.layout = html.Div([
     html.Div([
         dcc.Input(id='vote', value=0, type='number'),
         html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
+        html.Button(id='revoke-button-state', n_clicks=0, children='Revoke'),
     ]),
     html.Div(className='row', children=[
         html.Div(className='eight columns', children=[
@@ -180,7 +168,22 @@ app.layout = html.Div([
             html.H3("Vote Distribution"),
             dcc.Graph(id="vote_distribution")
         ])
-    ])
+    ]),
+    html.H3("Give the name of the actor/director/producer/composer interests you!"),
+    html.Div([
+        "Actor/Director/Producer/Composer Name: ",
+        dcc.Input(id='input_name', value='Clint Eastwood', type='text')
+    ]),
+    dcc.Graph(id='graph-with-slider'),
+    dcc.Slider(
+        id='year-slider',
+        min=1900,
+        max=2021,
+        value=1990,
+        marks={str(year): str(year) for year in range(1900,2021,10)},
+        step=None,
+        included=False
+    )
 ])
 
 
@@ -206,14 +209,34 @@ def update_pie(n_clicks, input_country):
     State("input_movie", "value"),
     State("vote", "value"),
     Input("submit-button-state", "n_clicks"))
-def update_table(input_movie, vote, n_clicks):
+def update_table(input_movie, vote, btn1):
     # print(n_clicks)
     # print(vote)
-    if n_clicks>0:
+    if btn1>0:
         temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
         if temp_dict!=None:
             temp_id = temp_dict['imdb_title_id']
-            new_rating = database_mongo.update_rating(temp_id, vote)
+            new_rating = database_mongo.update_rating(temp_id, vote,value = 1)
+            res = database_mysql.update_avg_vote(temp_id, new_rating)
+            print(res)
+            app1 = App()
+            app1.update_rating(temp_id, new_rating)
+            app1.close()
+    return None
+
+@app.callback(
+    Output("dummy2", "children"),
+    State("input_movie", "value"),
+    State("vote", "value"),
+    Input("revoke-button-state", "n_clicks"))
+def update_table(input_movie, vote, btn2):
+    # print(n_clicks)
+    # print(vote)
+    if btn2>0:
+        temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+        if temp_dict!=None:
+            temp_id = temp_dict['imdb_title_id']
+            new_rating = database_mongo.update_rating(temp_id, vote,value = -1)
             res = database_mysql.update_avg_vote(temp_id, new_rating)
             print(res)
             app1 = App()
@@ -225,12 +248,12 @@ def update_table(input_movie, vote, n_clicks):
 
 
 
-
 @app.callback(
     Output('movie_table', 'figure'),
     Input("input_movie", "value"),
-    Input("dummy1", "children"))
-def update_table(input_movie, n_clicks):
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
+def update_table(input_movie, n_clicks, adas):
     movie_dict = database_mysql.get_id_by_name("{}".format(input_movie))
     if movie_dict==None:
         fig1=go.Figure(go.Table(
@@ -251,15 +274,17 @@ def update_table(input_movie, n_clicks):
                 align='left')
             )
             ])
+        # fig1.update_layout(width=1900)
         fig1.update_layout(margin=dict(l=20, r=20, t=20, b=20))
     return fig1
 
 @app.callback(
     Output('vote_distribution', 'figure'),
     Input("input_movie", "value"),
-    Input("dummy1", "children"))
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
 
-def update_figure1(input_movie, dummy1):
+def update_figure1(input_movie, dummy1,adfasf):
     temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
     if temp_dict==None:
         fig =  px.bar()
@@ -275,9 +300,10 @@ def update_figure1(input_movie, dummy1):
     Output('graph-with-slider', 'figure'),
     Input('year-slider', 'value'),
     Input("input_name", "value"),
-    Input("dummy1", "children"))
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
 
-def update_figure(selected_year, input_name, n_clicks):
+def update_figure(selected_year, input_name, n_clicks,adfds):
 
     app1 = App()
     df = app1.find_movie_from_person("{}".format(input_name))
