@@ -31,3 +31,4 @@ python3 app.py
 
 ## Notes
 - The Neo4j is implemented on Neo4j AuraDB and it's commercial and collecting fees per hour. We have spent $30 on it. Closing the database will result in deletion on cloud, but we have to stop it after the Demo for saving money. If you want to implement the dashboard, please contact Lin Guo (linguo4@illinois.edu) to reinstall it.
+- The token used to connect with MongoDB Atlas is not commited into this repo due to concerns of data safety. Before compiling the program, please contact Xiaoying Zhu(xz45@illinois.edu) to get the token.
