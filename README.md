@@ -1,5 +1,5 @@
 # HDI_dashboard
-An dashboard for movie fans to explore and manipulate movie data in different level of granularity. 
+An HDI dashboard for movie fans to explore and manipulate movie data in different level of granularity. 
 ## Environment:
 Python 3.8.5
 ## Dependencies:
