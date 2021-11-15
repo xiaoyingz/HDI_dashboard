@@ -7,7 +7,7 @@ from pathlib import Path
 dotenv_path = Path('/Users/zhuxiaoying/Desktop/cs511_project/.env')
 env = dotenv.load_dotenv(dotenv_path='/Users/zhuxiaoying/Desktop/cs511_project/.env', verbose=True, override=False)
 password=os.getenv('PASSWORD')
-
+password = "zxy971215"
 def get_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC'):
     """
     :return: a list of dictionary with key as field name

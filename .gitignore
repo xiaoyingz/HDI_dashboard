@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+line.txt
+read_csv.py
+.DS_Store

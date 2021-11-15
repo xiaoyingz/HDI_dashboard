@@ -1,5 +1,5 @@
 # HDI_dashboard
-An HDI dashboard for movie fans to explore and manipulate movie data in different level of granularity. 
+An HDI dashboard for movie fans to explore and manipulate movie data in different level of granularity.
 ## Environment:
 Python 3.8.5
 ## Dependencies:
@@ -12,7 +12,7 @@ Python 3.8.5
 - mysql-connector-python
 - mysql
 
-## Set Up MySQL 
+## Set Up MySQL
 1. Installed and started MySQL, reference to https://dev.mysql.com/doc/mysql-getting-started/en/
 2. Connect to MySQL in terminal, i.e., `mysql -u root`
 3. Copy and run all the statements in `load_data.sql`
@@ -20,13 +20,14 @@ Python 3.8.5
 ## Compile
 To start the dashboard, run:
 ```
-python3 app.py
+cd src
+python3 main.py
 ```
 ## Files
 - app.py: main program to render the dashboard
 - database_mongo.py: contains helpers to fetch desired data from MongoDB Atlas
 - load_data.sql: contains SQL commands to create table schema and upload data
-- database_mysql.py: contains helpers to fetch and update desired data from MySQL 
+- database_mysql.py: contains helpers to fetch and update desired data from MySQL
 - server.py: just for testing methods in database_mongo.py
 - database_neo4j.py: contains helpers to fetch desired data from Neo4j Aura
 
