@@ -47,12 +47,14 @@ cd src
 python3 main.py
 ```
 ## Files
-- app.py: main program to render the dashboard
-- database_mongo.py: contains helpers to fetch desired data from MongoDB Atlas
+- main.py: main program to render the dashboard
+- overview.py: component that renders pre-defined widgets
+- create_dash.py: component that allows users creating dashboard from sketch
 - load_data.sql: contains SQL commands to create table schema and upload data
 - database_mysql.py: contains helpers to fetch and update desired data from MySQL
-- server.py: just for testing methods in database_mongo.py
 - database_neo4j.py: contains helpers to fetch desired data from Neo4j Aura
+- database_mongo.py: contains helpers to fetch desired data from MongoDB Atlas
+- server.py: just for testing methods in database_mongo.py
 
 ## Notes
 - The Neo4j is implemented on Neo4j AuraDB and it's commercial and collecting fees per hour. We have spent $30 on it. Closing the database will result in deletion on cloud, but we have to stop it after the Demo for saving money. If you want to implement the dashboard, please contact Lin Guo (linguo4@illinois.edu) to reinstall it.
