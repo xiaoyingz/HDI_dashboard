@@ -10,14 +10,7 @@ import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
-# from backend import database_mongo, database_mysql, database_neo4j
-# from frontend import overview, create_dash, schema
-# import overview
-# import create_dash
-# from database_neo4j import App
-# import database_mongo
-# import database_mysql
-# import schema
+
 import backend
 import frontend
 
@@ -38,9 +31,11 @@ SIDEBAR_STYLE = {
     "padding": "2rem 1rem",
     "background-color": "#f8f9fa",
 }
+
 filters=['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 inputs = ["widget_name", "query", "chart_type_dropdown"]
 widgets = []
+
 sidebar = html.Div(
     [
         html.H2("Sidebar", className="display-4"),

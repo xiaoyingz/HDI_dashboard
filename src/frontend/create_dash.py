@@ -47,16 +47,3 @@ create_dash_component = html.Div([
         ])
     ]),
 ])
-
-# @app.callback(
-#     Output(component_id='create_result', component_property='children'),
-#     Input(component_id='create_state', component_property='n_clicks'),
-#     [State(component_id=i, component_property='value') for i in inputs],
-# )
-# def create_widget(n_clicks, name, query, chart_type):
-#     widget_json = dump_widget(name, query, chart_type)
-#     widgets.append(widget_json)
-#     print(widgets)
-#     return html.Div([
-#         w for w in widgets
-#     ])

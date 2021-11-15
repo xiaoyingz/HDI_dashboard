@@ -11,6 +11,29 @@ Python 3.8.5
 - neo4j
 - mysql-connector-python
 - mysql
+- dash_bootstrap_components
+
+## File structure
+```
+.
+├── README.md
+├── assets
+│   └── style.css
+├── load_data.sql
+├── load_data_Neo4j.cql
+├── movie.csv
+├── server.py
+└── src
+    ├── backend
+    │   ├── database_mongo.py
+    │   ├── database_mysql.py
+    │   └── database_neo4j.py
+    ├── frontend
+    │   ├── create_dash.py
+    │   ├── overview.py
+    │   └── schema.py
+    └── main.py
+```
 
 ## Set Up MySQL
 1. Installed and started MySQL, reference to https://dev.mysql.com/doc/mysql-getting-started/en/
