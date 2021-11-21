@@ -17,12 +17,12 @@ from backend import database_neo4j
 from backend import parser
 from frontend import create_dash
 from frontend import overview
-from frontend import schema 
+from frontend import schema
 
 app = dash.Dash(
-    __name__, 
-    external_scripts=["https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"], 
-    external_stylesheets=[dbc.themes.BOOTSTRAP], 
+    __name__,
+    external_scripts=["https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"],
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True)
 
 CONTENT_STYLE = {
@@ -41,8 +41,9 @@ SIDEBAR_STYLE = {
     "background-color": "#f8f9fa",
 }
 
-filters=['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
-inputs = ["widget_name", "query", "chart_type_dropdown"]
+filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
+inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
+          "chart_type_dropdown"]
 widgets = []
 
 sidebar = html.Div(
@@ -79,6 +80,7 @@ app.clientside_callback(
     [Input("drag_container", "id")],
 )
 
+
 @app.callback(
     Output("page-content", "children"),
     [Input("url", "pathname")]
@@ -89,18 +91,21 @@ def render_page_content(pathname):
     elif pathname == "/create-your-own":
         return create_dash.create_dash_component
 
+
 @app.callback(
     Output(component_id='drag_container', component_property='children'),
     Input(component_id='create_state', component_property='n_clicks'),
     [State(component_id=i, component_property='value') for i in inputs],
 )
-
-def create_widget(n_clicks, name, query, chart_type):
+def create_widget(n_clicks, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+                  chart_type):
     print(n_clicks)
     if n_clicks != 0:
-        widget_json = create_dash.dump_widget(name, query, chart_type)
+        widget_json = create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
+                                              group_attribute, chart_type)
         widgets.append(widget_json)
-    return dbc.Card(dbc.CardBody([html.H2(w) for w in widgets])) 
+    return dbc.Card(dbc.CardBody([html.H2(w) for w in widgets]))
+
 
 @app.callback(
     Output(component_id='search_result', component_property='children'),
@@ -109,6 +114,7 @@ def create_widget(n_clicks, name, query, chart_type):
 )
 def update_table(n_clicks, country, year, genre, low, high, order):
     return overview.generate_table(country, year, genre, low, high, order)
+
 
 @app.callback(
     Output(component_id='pie_chart', component_property='figure'),
@@ -127,11 +133,11 @@ def update_pie(n_clicks, input_country):
 def update_table(input_movie, vote, btn1):
     # print(n_clicks)
     # print(vote)
-    if btn1>0:
+    if btn1 > 0:
         temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
-        if temp_dict!=None:
+        if temp_dict != None:
             temp_id = temp_dict['imdb_title_id']
-            new_rating = database_mongo.update_rating(temp_id, vote,value = 1)
+            new_rating = database_mongo.update_rating(temp_id, vote, value=1)
             res = database_mysql.update_avg_vote(temp_id, new_rating)
             print(res)
             app1 = database_neo4j.App()
@@ -140,11 +146,5 @@ def update_table(input_movie, vote, btn1):
     return None
 
 
-
-
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
-
-

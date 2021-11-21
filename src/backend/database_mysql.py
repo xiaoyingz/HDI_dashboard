@@ -78,7 +78,7 @@ def get_id_by_name(movie_title, original=True):
     :param original: whether use title or original_title, default is using original_title
     :return: dict {field_name:val} movie information
     """
-    cnx = mysql.connector.connect(user='root', database='cs511movie', password='88888888')
+    cnx = mysql.connector.connect(user='root', database='mp')
     cursor = cnx.cursor()
     if original:
         query = ("SELECT * FROM movie "
@@ -101,7 +101,7 @@ def update_avg_vote(movie_id, avg_vote):
     update the average voting of a movie given movie_id
     :return: updated data {movie_id:{}, avg_vote:{}}
     """
-    cnx = mysql.connector.connect(user='root', database='cs511movie')
+    cnx = mysql.connector.connect(user='root', database='mp')
     cursor = cnx.cursor()
     query = ("UPDATE movie "
              "SET avg_vote = %s "
@@ -122,9 +122,19 @@ def update_avg_vote(movie_id, avg_vote):
         return -1
     return res
 
+def get_category_attribute_options(col_name):
+    cnx = mysql.connector.connect(user='root', database='mp')
+    cursor = cnx.cursor()
+    query = ("SELECT DISTINCT {} FROM movie".format(col_name))
+    cursor.execute(query)
+    res = [item[0] for item in cursor]
+    cursor.close()
+    cnx.close()
+    return res
+
 if __name__ == '__main__':
-    movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
-    print(movies)
+    # movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
+    # print(movies)
     # counter = group_movies_by_country()
     # #print(counter)
     # counter = group_movies_by_genre('China')
@@ -138,3 +148,4 @@ if __name__ == '__main__':
     # movie = get_id_by_name('Tempi moderni', False)
     # print(movie)
     # print(get_movies(country='Brazil', year=1985, avg_vote=(5,8), genre='Drama'))
+    print(get_category_attribute_options("country"))
