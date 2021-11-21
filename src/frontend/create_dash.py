@@ -74,7 +74,8 @@ create_dash_component = html.Div([
             id="group_attribute",
             options=[
                 {'label': 'country', 'value': 'country'},
-                {'label': 'genre', 'value': 'genre'}
+                {'label': 'genre', 'value': 'genre'},
+                {'label': 'None', 'value': 'None'},
             ],
             value='country',
             clearable=False
@@ -84,7 +85,8 @@ create_dash_component = html.Div([
             id="chart_type_dropdown",
             options=[
                 {'label': 'bar chart', 'value': 'BAR'},
-                {'label': 'pie chart', 'value': 'PIE'}
+                {'label': 'pie chart', 'value': 'PIE'},
+                {'label': 'table', 'value': 'table'}
             ],
             value='BAR',
             clearable=False
