@@ -9,6 +9,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import json
 from backend import database_mysql
+from backend import database_mongo
 
 app = dash.Dash(
     __name__,
@@ -31,9 +32,60 @@ def widgetJsonDecod(messageDict):
     return namedtuple('Widget', widgetDict.keys())(*widget.values())
 
 
+def generate_pie(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
+    pie_data = {group_key: [], "counts": []}
+    for item in data:
+        pie_data[group_key].append(item["_id"])
+        pie_data["counts"].append(item["total"])
+    pie_fig = px.pie(pie_data, values='counts', names=group_key, title=name)
+    return pie_fig
+
+
+def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=10):
+    data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
+    length = min(len(data), max_bars)
+    bar_data = {group_key: [data[i]["_id"] for i in range(length)],
+                "count": [data[i]["total"] for i in range(length)]
+                }
+    bar_fig = px.bar(bar_data, x=group_key, y="count", barmode="group", title=name)
+    return bar_fig
+
+
+def generate_table(name, country, year, avg_vote, genre):
+    data = database_mysql.filter_movies(country, year, avg_vote, genre)
+    #header_values = list(data[0].keys())
+    header_values = ["title", "country", "year", "avg_vote", "genre"]
+    col_values = [[item[col] for item in data] for col in header_values]
+    fig = go.Figure(data=[go.Table(header=dict(values=header_values),
+                                   cells=dict(values=col_values))
+                          ])
+    fig.update_layout(title=name)
+    return fig
+
+
 def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type):
-    widget = Widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type)
-    return json.dumps(widget.__dict__)
+    if country == 'all':
+        country = None
+    if genre == 'all':
+        genre = None
+    figure = None
+    if chart_type == 'PIE':
+        figure = generate_pie(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
+                              genre)
+    elif chart_type == 'BAR':
+        figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
+                              genre)
+    else:
+        figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
+    return html.Div(
+        className="six columns",
+        children=[
+            dcc.Graph(
+                id='pie_chart',
+                figure=figure
+            ),
+        ])
 
 
 def get_attributes(col_name):
