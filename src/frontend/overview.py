@@ -9,10 +9,10 @@ import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
 
-from database_neo4j import App
-import database_mongo
-import database_mysql
-import schema
+# from database_neo4j import App
+from backend import database_mongo
+from backend  import database_mysql 
+from frontend import schema
 
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 

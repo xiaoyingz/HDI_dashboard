@@ -3,12 +3,15 @@ import pandas as pd
 from dash import dcc
 from dash import html
 from dash import dash_table
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ClientsideFunction
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 import json
 
-app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
+app = dash.Dash(
+    __name__,
+    external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 class Widget:
 	def __init__(self, name, query, chart_type):
@@ -42,8 +45,18 @@ create_dash_component = html.Div([
             clearable=False
         ),
         html.Button(id='create_state', children='Create', n_clicks=0),
-        html.Div(id="create_result", children=[
-            html.H2("empty")
-        ])
-    ]),
+        html.Div(id="drag_container", className="container", children=[
+                html.Div(id="create_result"),
+                dbc.Card([
+                    dbc.CardHeader("Card c"),
+                    dbc.CardBody(
+                        "Some more content"
+                    ),
+                ]),
+        ]), 
+    ])
 ])
+
+
+
+

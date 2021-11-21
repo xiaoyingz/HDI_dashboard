@@ -4,17 +4,26 @@ import pandas as pd
 from dash import dcc
 from dash import html
 from dash import dash_table
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output, State, ClientsideFunction
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 
-import backend
-import frontend
+from backend import database_mongo
+from backend import database_mysql
+from backend import database_neo4j
+from backend import parser
+from frontend import create_dash
+from frontend import overview
+from frontend import schema 
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(
+    __name__, 
+    external_scripts=["https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.2/dragula.min.js"], 
+    external_stylesheets=[dbc.themes.BOOTSTRAP], 
+    suppress_callback_exceptions=True)
 
 CONTENT_STYLE = {
     "margin-left": "18rem",
@@ -64,6 +73,12 @@ app.layout = html.Div([
     content
 ])
 
+app.clientside_callback(
+    ClientsideFunction(namespace="clientside", function_name="make_draggable"),
+    Output("drag_container", "data-drag"),
+    [Input("drag_container", "id")],
+)
+
 @app.callback(
     Output("page-content", "children"),
     [Input("url", "pathname")]
@@ -75,18 +90,18 @@ def render_page_content(pathname):
         return create_dash.create_dash_component
 
 @app.callback(
-    Output(component_id='create_result', component_property='children'),
+    Output(component_id='drag_container', component_property='children'),
     Input(component_id='create_state', component_property='n_clicks'),
     [State(component_id=i, component_property='value') for i in inputs],
 )
+
 def create_widget(n_clicks, name, query, chart_type):
     print(n_clicks)
     if n_clicks != 0:
         widget_json = create_dash.dump_widget(name, query, chart_type)
         widgets.append(widget_json)
-    return html.Div([
-        html.H2(w) for w in widgets
-    ])
+    return dbc.Card(dbc.CardBody([html.H2(w) for w in widgets])) 
+
 @app.callback(
     Output(component_id='search_result', component_property='children'),
     Input(component_id='search_state', component_property='n_clicks'),
@@ -102,6 +117,7 @@ def update_table(n_clicks, country, year, genre, low, high, order):
 )
 def update_pie(n_clicks, input_country):
     return overview.generate_pie(input_country)
+
 
 @app.callback(
     Output("dummy1", "children"),
@@ -122,5 +138,13 @@ def update_table(input_movie, vote, btn1):
             app1.update_rating(temp_id, new_rating)
             app1.close()
     return None
+
+
+
+
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+
+
