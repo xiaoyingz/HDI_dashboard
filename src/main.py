@@ -4,12 +4,13 @@ import pandas as pd
 from dash import dcc
 from dash import html
 from dash import dash_table
-from dash.dependencies import Input, Output, State, ClientsideFunction
+from dash.dependencies import Input, Output, State, ClientsideFunction, ALL
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
+import json
 
 from backend import database_mongo
 from backend import database_mysql
@@ -93,18 +94,64 @@ def render_page_content(pathname):
 
 
 @app.callback(
-    Output(component_id='drag_container', component_property='children'),
-    Input(component_id='create_state', component_property='n_clicks'),
-    [State(component_id=i, component_property='value') for i in inputs],
+    Output('drag_container', 'children'),
+    [
+        Input('create_state', 'n_clicks'),
+        Input({"type": "dynamic-delete", "index": ALL}, "n_clicks"),
+    ],
+    State("drag_container", "children"), [State(component_id=i, component_property='value') for i in inputs],
 )
-def create_widget(n_clicks, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
                   chart_type):
-    print(n_clicks)
-    if n_clicks != 0:
-        widget_json = create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
+    input_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
+    if "index" in input_id:
+        delete_chart = json.loads(input_id)["index"]
+        children = [
+            chart
+            for chart in children
+            if "'index': " + str(delete_chart) not in str(chart)
+        ]
+    else:
+        new_element = html.Div(
+            style={
+                "width": "100%",
+                "display": "inline-block",
+                "outline": "thin lightgrey solid",
+                "padding": 10,
+            },
+            children=[
+                html.Button(
+                    "X",
+                    id={"type": "dynamic-delete", "index": n_clicks},
+                    n_clicks=0,
+                    style={"display": "block"},
+                ),
+                dcc.Graph(
+                    id={"type": "dynamic-output", "index": n_clicks},
+                    style={"height": 300},
+                    figure=create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
                                               group_attribute, chart_type)
-        widgets.append(widget_json)
-    return [dbc.Card(dbc.CardBody([html.H2(w)])) for w in widgets]
+                ),
+            ]
+        )
+        children.append(new_element)
+    return [dbc.Card(w) for w in children]
+
+    # return [dbc.Card([html.Button(
+    #                 "X",
+    #                 id={"type": "dynamic-delete", "index": n_clicks},
+    #                 n_clicks=0,
+    #                 style={"display": "block"},
+    #             ),w]) for w in widgets]
+
+#  html.Div(
+#         className="six columns",
+#         children=[
+#             dcc.Graph(
+#                 id='pie_chart',
+#                 figure=figure
+#             ),
+#         ])
 
 
 @app.callback(
