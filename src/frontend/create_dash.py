@@ -146,12 +146,6 @@ create_dash_component = html.Div([
         html.Button(id='create_state', children='Create', n_clicks=0),
         html.Div(id="drag_container", className="container", children=[
             html.Div(id="create_result"),
-            dbc.Card([
-                dbc.CardHeader("Card c"),
-                dbc.CardBody(
-                    "Some more content"
-                ),
-            ]),
         ]),
     ])
 ])

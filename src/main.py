@@ -104,7 +104,7 @@ def create_widget(n_clicks, name, country, genre, lowest_avg_vote, lowest_year, 
         widget_json = create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
                                               group_attribute, chart_type)
         widgets.append(widget_json)
-    return dbc.Card(dbc.CardBody([html.H2(w) for w in widgets]))
+    return [dbc.Card(dbc.CardBody([html.H2(w)])) for w in widgets]
 
 
 @app.callback(
