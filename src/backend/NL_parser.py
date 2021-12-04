@@ -16,7 +16,11 @@ def parse_group_attribute(info, expression):
 
 
 def parse_filter_string(info, attribute, condition):
-    print(get_category_attribute_options('country'))
+    options = [word.lower() for word in get_category_attribute_options(attribute)]
+    for word in condition.split(' '):
+        if word.lower() in options:
+            info['filter'][attribute] = word
+            break
 
 
 def check_float(potential_float):
