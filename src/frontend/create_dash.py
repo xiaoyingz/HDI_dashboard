@@ -78,14 +78,8 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
                               genre)
     else:
         figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
-    return html.Div(
-        className="six columns",
-        children=[
-            dcc.Graph(
-                id='pie_chart',
-                figure=figure
-            ),
-        ])
+    return figure
+    
 
 
 def get_attributes(col_name):
@@ -100,7 +94,7 @@ genre_options = get_attributes("genre")
 create_dash_component = html.Div([
     html.Div([
         "Widget name: ",
-        dcc.Input(id='widget_name', value='Widget1', type='text'),
+        dcc.Input(id='widget_name', value='USA Action Movie with Rating over 7 (2008-2018)', type='text'),
         "Country: ",
         dcc.Dropdown(
             id="country",
@@ -144,14 +138,6 @@ create_dash_component = html.Div([
             clearable=False
         ),
         html.Button(id='create_state', children='Create', n_clicks=0),
-        html.Div(id="drag_container", className="container", children=[
-            html.Div(id="create_result"),
-            dbc.Card([
-                dbc.CardHeader("Card c"),
-                dbc.CardBody(
-                    "Some more content"
-                ),
-            ]),
-        ]),
+        html.Div(id="drag_container", className="container", children=[]),
     ])
 ])
