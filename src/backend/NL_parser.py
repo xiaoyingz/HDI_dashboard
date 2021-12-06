@@ -9,6 +9,8 @@ def parse_chart_type(info, expression):
         info["chart_type"] = "BAR"
     elif 'box plot' in expression:
         info["chart_type"] = "BOX"
+    elif 'scatter plot' in expression:
+        info["chart_type"] = "scatter"
     elif 'heatmap' in expression:
         info['chart_type'] = 'heatmap'
     else:
@@ -20,7 +22,7 @@ def parse_group_attribute(info, expression):
     words = result.split(' ')
     if len(words) > 1 and words[1] == 'and':
         info['group_attribute'] = (words[0], words[2])
-    elif 'box plot' in expression:
+    elif 'box plot' in expression or 'scatter plot' in expression:
         for attribute in ['avg_vote', 'budget', 'metascore', 'worldwide_gross_income', 'usa_gross_income']:
             if attribute in expression:
                 info['group_attribute'] = (words[0], attribute)
@@ -85,7 +87,7 @@ def parser(expression):
     """
     :param expression:
     1. group/grouped/grouping by followed by attribute
-    2. must include 'pie chart'/'bar chart'/'table'/'heatmap'/'boxplot'
+    2. must include 'pie chart'/'bar chart'/'table'/'heatmap'/'boxplot'/'scatter plot'
     3. with ... and ... to express filter condition
     4. for numbers, use 'equal to'/'greater than or equal to'/'less than or equal to'/'between'/'greater than'/'less than'
     :return:
@@ -112,7 +114,7 @@ def get_name(parsed):
         name = "movies by {}".format(parsed["group_attribute"])
     elif parsed["chart_type"] == "table":
         name = "movies"
-    elif parsed["chart_type"] == "BOX":
+    elif parsed["chart_type"] in ["BOX", 'scatter']:
         name = "{} vs {}".format(parsed["group_attribute"][1], parsed["group_attribute"][0])
     elif parsed["chart_type"] == 'heatmap':
         name = "movies by {} and {}".format(parsed["group_attribute"][0], parsed["group_attribute"][1])
