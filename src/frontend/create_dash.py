@@ -68,6 +68,20 @@ def generate_box_plot(name, group_key, country, year, avg_vote, genre):
     return box_fig
 
 
+def generate_scatter_plot(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_movies(country, year, avg_vote, genre)
+    if group_key[1] not in ["avg_vote", "metascore"]:
+        scatter_data = {group_key[0]: [item[group_key[0]] for item in data if item[group_key[1]][0] == '$'],
+                    group_key[1]: [int(item[group_key[1]][2:]) for item in data if item[group_key[1]][0] == '$']
+                    }
+    else:
+        scatter_data = {group_key[0]: [item[group_key[0]] for item in data],
+                    group_key[1]: [item[group_key[1]] for item in data]
+                    }
+    scatter_fig = px.scatter(scatter_data, x=group_key[0], y=group_key[1], title=name)
+    return scatter_fig
+
+
 def generate_heatmap(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_group_movies_2D((group_key[0], group_key[1]), country, year, avg_vote, genre)
     heatmap_data = {group_key[0]: [item[group_key[0]] for item in data],
@@ -118,6 +132,10 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
                               genre)
     elif chart_type == 'BOX':
         figure = generate_box_plot(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
+                                   (lowest_avg_vote, 10),
+                                   genre)
+    elif chart_type == 'scatter':
+        figure = generate_scatter_plot(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
                                    (lowest_avg_vote, 10),
                                    genre)
     elif chart_type == 'heatmap':
@@ -187,7 +205,7 @@ filter_tab_div = html.Div([
         value='country',
         clearable=False
     ),
-    "Target Attribute(top 6 for heatmap and bottom 5 for box plot): ",
+    "Target Attribute(top 6 for heatmap and bottom 5 for box plot & scatter plot): ",
     dcc.Dropdown(
         id="target_attribute",
         options=[
@@ -215,6 +233,7 @@ filter_tab_div = html.Div([
         options=[
             {'label': 'bar chart', 'value': 'BAR'},
             {'label': 'pie chart', 'value': 'PIE'},
+            {'label': 'scatter plot', 'value': 'scatter'},
             {'label': 'box plot', 'value': 'BOX'},
             {'label': 'heatmap', 'value': 'heatmap'},
             {'label': 'table', 'value': 'table'}
