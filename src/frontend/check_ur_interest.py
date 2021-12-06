@@ -1,4 +1,3 @@
-
 import dash
 import pandas as pd
 from dash import dcc
@@ -12,7 +11,7 @@ import dash_bootstrap_components as dbc
 
 # from database_neo4j import App
 from backend import database_mongo
-from backend  import database_mysql 
+from backend  import database_mysql
 from backend  import database_neo4j
 from frontend import schema
 
@@ -25,10 +24,11 @@ interest_component = html.Div([
     html.Div(id='dummy1'),
     html.Div(id='dummy2'),
     html.Div([
+        html.Div(id="movie_title"),
         "Movie Name: ",
         dcc.Input(id='input_movie', value='Million Dollar Baby', type='text')
     ]),
-    html.H3("Your vote! (From 1 to 10)"),
+    html.H5("Your vote! (From 1 to 10)"),
     html.Div([
         dcc.Input(id='vote', value=0, type='number'),
         html.Button(id='submit-button-state', n_clicks=0, children='Submit'),
@@ -36,19 +36,22 @@ interest_component = html.Div([
     ]),
     html.Div(className='row', children=[
         html.Div(className='eight columns', children=[
-            html.H3("Movie details"),
+            html.H5("Movie details"),
             dcc.Graph(id='movie_table')
         ]),
         html.Div(className='four columns', children=[
-            html.H3("Vote Distribution"),
+            html.H5("Vote Distribution"),
             dcc.Graph(id="vote_distribution")
         ])
     ]),
+    html.Br(),
+    html.Br(),
     html.H3("Give the name of the actor/director/producer/composer interests you!"),
     html.Div([
-        "Actor/Director/Producer/Composer Name: ",
+        "Type in Actor/Director/Producer/Composer Name: ",
         dcc.Input(id='input_name', value='Clint Eastwood', type='text')
     ]),
+    "(You may toggle the slider to view movies after a certain year.)",
     dcc.Graph(id='graph-with-slider'),
     dcc.Slider(
         id='year-slider',

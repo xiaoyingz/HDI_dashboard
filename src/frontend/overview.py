@@ -11,7 +11,7 @@ import dash_bootstrap_components as dbc
 
 # from database_neo4j import App
 from backend import database_mongo
-from backend  import database_mysql 
+from backend  import database_mysql
 from frontend import schema
 
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
@@ -107,6 +107,7 @@ overview_component = html.Div([
             html.Div(
                 className="six columns",
                 children=[
+                    html.H3("Which country are you interested in?"),
                     dcc.Graph(
                         id='pie_chart',
                         figure=generate_pie()

@@ -52,7 +52,7 @@ last_num = [0]
 
 sidebar = html.Div(
     [
-        html.H2("Sidebar", className="display-4"),
+        html.H2("Meta Movie!", className="display-4"),
         html.Hr(),
         html.P(
             "Dashboard for IMDB movies", className="lead"
@@ -62,7 +62,6 @@ sidebar = html.Div(
                 dbc.NavLink("Overview", href="/", active="exact"),
                 dbc.NavLink("Search your interest", href="/check_ur_interest", active="exact"),
                 dbc.NavLink("Create your own", href="/create-your-own", active="exact"),
-                dbc.NavLink("More", href="/more", active="exact"),
             ],
             vertical=True,
             pills=True,
@@ -194,6 +193,14 @@ def create_widget(n_clicks, _, children, tab_children):
 #             ),
 #         ])
 
+@app.callback(
+    Output("movie_title", "children"),
+    State("input_movie", "value"),
+    Input("submit-button-state", "n_clicks")
+)
+def update_information_title(value, n_clicks):
+    print("callback")
+    return html.H3("Information for movie: "+value)
 
 @app.callback(
     Output(component_id='search_result', component_property='children'),

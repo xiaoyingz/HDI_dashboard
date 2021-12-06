@@ -162,6 +162,7 @@ country_options = get_attributes("country")
 genre_options = get_attributes("genre")
 
 filter_tab_div = html.Div([
+    html.H3("Create a widget by simple click."),
     html.H4("Widget name: "),
     dcc.Input(id='widget_name', value='widget', type='text'),
     html.Br(),
@@ -244,7 +245,8 @@ filter_tab_div = html.Div([
 ], id="filter_tab_div")
 
 sql_tab_div = html.Div([
-    html.H4("Attributes: "),
+    html.H3("Display a table by entering a SQL query."),
+    html.H4("Available attributes: "),
     html.H6(
         "imdb_title_id, title, original_title, year, date_published, genre, duration, country, language, director, writer, production_company, actors, description, avg_vote, votes, budget, usa_gross_income, worldwide_gross_income, metascore, reviews_from_users, reviews_from_critics"),
     dcc.Textarea(id="sql_input",
@@ -254,6 +256,9 @@ sql_tab_div = html.Div([
 ], id="sql_tab_div")
 
 natural_language_tab_div = html.Div([
+    html.H3("Ask dashboard to generate a widget by a single sentence."),
+    html.Br(),
+    "Supported chart types: pie chart, bar chart, table, heatmap, boxplot, scatter plot.",
     dcc.Input(id="natural_language_input",
               value="Display a bar chart showing the distribution group by genre with year between 2002 to 2010",
               type='text')
