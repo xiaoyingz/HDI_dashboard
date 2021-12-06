@@ -46,7 +46,7 @@ SIDEBAR_STYLE = {
 filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
           "chart_type_dropdown"]
-# widgets = []
+widgets = []
 # widgets_num = 0
 last_num = [0]
 
@@ -113,15 +113,17 @@ def render_page_content(pathname):
 # def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
 #                   chart_type):
 def create_widget(n_clicks, _, children, tab_children):
+    global widgets
+    # print(n_clicks)
     input_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     if "index" in input_id:
         delete_chart = json.loads(input_id)["index"]
-        children = [
+        widgets = [
             chart
             for chart in children
             if "'index': " + str(delete_chart) not in str(chart)
         ]
-    else:
+    elif n_clicks > 0:
         children_obj = tab_children[1]["props"]["children"]
         if children_obj:
             l = []
@@ -130,12 +132,13 @@ def create_widget(n_clicks, _, children, tab_children):
                     l.append(item["props"]["value"])
 
             if children_obj["props"]["id"] == "filter_tab_div":
+                l.insert(7, None)
                 curr_fig = create_dash.dump_widget(*l)
             elif children_obj["props"]["id"] == "natural_language_tab_div":
                 parsed = NL_parser.parser(*l)
                 lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
                 curr_fig = create_dash.dump_widget('widget'+str(last_num[0]), parsed["filter"]["country"], parsed["filter"]["genre"],
-                                                    lowest_avg_vote, *parsed["filter"]["year"], parsed["group_attribute"], parsed["chart_type"])
+                                                    lowest_avg_vote, *parsed["filter"]["year"], parsed["group_attribute"], None, parsed["chart_type"])
 
             new_element = html.Div(
                 style={
@@ -158,9 +161,9 @@ def create_widget(n_clicks, _, children, tab_children):
                     ),
                 ]
             )
-            children.append(new_element)
+            widgets.append(new_element)
             last_num[0] += 1
-    return [dbc.Card(w) for w in children]
+    return [dbc.Card(w) for w in widgets]
 
     # return [dbc.Card([html.Button(
     #                 "X",
