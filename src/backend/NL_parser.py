@@ -1,18 +1,27 @@
 import re
 from backend.database_mysql import get_category_attribute_options
 
+
 def parse_chart_type(info, expression):
     if "pie chart" in expression:
         info["chart_type"] = "pie chart"
     elif "bar chart" in expression:
         info["chart_type"] = "bar chart"
+    elif 'box plot' in expression:
+        info["chart_type"] = "box plot"
+    elif 'heatmap' in expression:
+        info['chart_type'] = 'heatmap'
     else:
-        info["chart_type"] = "table"
+        info['chart_type'] = 'table'
 
 
 def parse_group_attribute(info, expression):
     result = re.findall(r'[\w ]+ (?:group|grouped|grouping) by ([\w ]+)', expression)[0]
-    info['group_attribute'] = result.split(' ')[0]
+    words = result.split(' ')
+    if words[1] == 'and':
+        info['group_attribute'] = (words[0], words[2])
+    else:
+        info['group_attribute'] = words[0]
 
 
 def parse_filter_string(info, attribute, condition):
@@ -71,7 +80,7 @@ def parser(expression):
     """
     :param expression:
     1. group/grouped/grouping by followed by attribute
-    2. must include 'pie chart'/'bar chart'/'table'
+    2. must include 'pie chart'/'bar chart'/'table'/'heatmap'/'boxplot'
     3. with ... and ... to express filter condition
     4. for numbers, use 'equal to'/'greater than or equal to'/'less than or equal to'/'between'/'greater than'/'less than'
     :return:
@@ -80,10 +89,11 @@ def parser(expression):
                         'year': (2008, 2009)}}
     note: range is inclusive
     """
-    info = {"chart_type": None, "group_attribute": None, "target_variable": None,
+    info = {"chart_type": None, "group_attribute": None,
             "filter": {"country": None, "year": None, "avg_vote": None, "genre": None}}
     parse_chart_type(info, expression)
-    parse_group_attribute(info, expression)
+    if info["chart_type"] != 'table':
+        parse_group_attribute(info, expression)
     filter_expression = expression[expression.find('with') + len('with'):].lstrip()
     filter_conditions = filter_expression.split(' and ')
     for filter_condition in filter_conditions:
@@ -92,15 +102,17 @@ def parser(expression):
 
 
 if __name__ == '__main__':
-    expression = "Display a pie chart showing the average vote grouped by country " \
+    expression = "Display a pie chart showing the distribution grouped by country " \
                  "with action as the genre and China as the country"
     print(parser(expression))
-    expression = "Display a pie chart showing the average vote group by genre " \
+    expression = "Display a bar chart showing the distribution group by genre " \
                  "with year between 2002 to 2010"
     print(parser(expression))
-    expression = "Display a pie chart showing the average vote grouped by country " \
+    expression = "Display a heatmap showing the average vote grouped by country and genre " \
                  "with year greater than or equal to 2010"
     print(parser(expression))
-    expression = "Display a pie chart showing the average vote grouped by country " \
-                 "with average vote between 6.5 to 10.0"
+    expression = "Display a box plot showing the distribution of average vote grouped by country " \
+                 "with average vote between 6.5 to 10.0 and year less than 2021"
+    print(parser(expression))
+    expression = "Display a table"
     print(parser(expression))
