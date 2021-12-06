@@ -240,8 +240,20 @@ def filter_movies(country=None, year=None, avg_vote=None, genre=None, order='DES
     return res
 
 
+def sql(expression):
+    cnx, cursor = get_cursor()
+    cursor.execute(expression)
+    fields = [i[0] for i in cursor.description]
+    res = []
+    for item in cursor:
+        res.append(dict(zip(fields, item)))
+    cursor.close()
+    cnx.close()
+    return res
+
+
 if __name__ == '__main__':
-    # movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
+    movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
     # print(movies)
     # counter = group_movies_by_country()
     # #print(counter)
@@ -257,5 +269,6 @@ if __name__ == '__main__':
     # print(movie)
     # print(get_movies(country='Brazil', year=1985, avg_vote=(5,8), genre='Drama'))
     # print(get_category_attribute_options("country"))
-    #print(filter_group_movies(group_key='country', country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
-    print(filter_group_movies_2D(group_key=('country', 'genre'), country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
+    # print(filter_group_movies(group_key='country', country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
+    # print(filter_group_movies_2D(group_key=('country', 'genre'), country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
+    # print(sql('SELECT country FROM movie'))
