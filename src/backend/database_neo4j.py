@@ -6,9 +6,9 @@ import pandas as pd
 class App:
 
     def __init__(self):
-        uri = "neo4j+s://73def97d.databases.neo4j.io"
+        uri = "neo4j+s://6b402c80.databases.neo4j.io"
         user="neo4j"
-        password="wivMop_vV-6GvErRjS6jI78237QfKRYK4T8J6NTCTqA"
+        password="L1_1FT7yRIg1VB35sJQbpJ_BH8AM3iwf_Yv62CdMBY0"
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
         
     

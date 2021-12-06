@@ -17,7 +17,8 @@ app = dash.Dash(
 
 
 class Widget:
-    def __init__(self, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type):
+    def __init__(self, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+                 target_attribute, chart_type):
         self.name = name
         self.country = country
         self.genre = genre
@@ -25,6 +26,7 @@ class Widget:
         self.lowest_year = lowest_year
         self.largest_year = largest_year
         self.group_attribute = group_attribute
+        self.target_attribute = target_attribute
         self.chart_type = chart_type
 
 
@@ -42,9 +44,9 @@ def generate_pie(name, group_key, country, year, avg_vote, genre):
     return pie_fig
 
 
-def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=10):
+def generate_bar(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
-    length = min(len(data), max_bars)
+    length = len(data)
     bar_data = {group_key: [data[i]["_id"] for i in range(length)],
                 "count": [data[i]["total"] for i in range(length)]
                 }
@@ -52,9 +54,28 @@ def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=10):
     return bar_fig
 
 
+def generate_box_plot(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_movies(country, year, avg_vote, genre)
+    box_data = {group_key: [item[group_key] for item in data],
+                "average vote": [item["avg_vote"] for item in data]
+                }
+    box_fig = px.box(box_data, x=group_key, y="average vote", title=name)
+    return box_fig
+
+
+def generate_heatmap(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_group_movies_2D((group_key[0], group_key[1]), country, year, avg_vote, genre)
+    heatmap_data = {group_key[0]: [item[group_key[0]] for item in data],
+                    group_key[1]: [item[group_key[1]] for item in data],
+                    "count": [item["total"] for item in data]
+                    }
+    heatmap_fig = px.density_heatmap(heatmap_data, x=group_key[0], y=group_key[1], title=name)
+    return heatmap_fig
+
+
 def generate_table(name, country, year, avg_vote, genre):
     data = database_mysql.filter_movies(country, year, avg_vote, genre)
-    #header_values = list(data[0].keys())
+    # header_values = list(data[0].keys())
     header_values = ["title", "country", "year", "avg_vote", "genre"]
     col_values = [[item[col] for item in data] for col in header_values]
     fig = go.Figure(data=[go.Table(header=dict(values=header_values),
@@ -64,7 +85,8 @@ def generate_table(name, country, year, avg_vote, genre):
     return fig
 
 
-def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type):
+def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
+                chart_type):
     if country == 'all':
         country = None
     if genre == 'all':
@@ -76,6 +98,14 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
     elif chart_type == 'bar chart':
         figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
                               genre)
+    elif chart_type == 'BOX':
+        figure = generate_box_plot(name, group_attribute, country, (lowest_year, largest_year),
+                                   (lowest_avg_vote, 10),
+                                   genre)
+    elif chart_type == 'heatmap':
+        figure = generate_heatmap(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
+                                  (lowest_avg_vote, 10),
+                                  genre)
     else:
         figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
     return figure
