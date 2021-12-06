@@ -34,6 +34,8 @@ def widgetJsonDecod(messageDict):
 
 def generate_pie(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
+    if group_key == 'avg_vote':
+        data = aggregate_average_vote(data)
     pie_data = {group_key: [], "counts": []}
     for item in data:
         pie_data[group_key].append(item["_id"])
@@ -42,8 +44,10 @@ def generate_pie(name, group_key, country, year, avg_vote, genre):
     return pie_fig
 
 
-def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=10):
+def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=15):
     data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
+    if group_key == 'avg_vote':
+        data = aggregate_average_vote(data)
     length = min(len(data), max_bars)
     bar_data = {group_key: [data[i]["_id"] for i in range(length)],
                 "count": [data[i]["total"] for i in range(length)]
@@ -52,9 +56,18 @@ def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=10):
     return bar_fig
 
 
+def generate_box_plot(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_movies(country, year, avg_vote, genre)
+    box_data = {group_key: [item[group_key] for item in data],
+                "average vote": [item["avg_vote"] for item in data]
+                }
+    box_fig = px.box(box_data, x=group_key, y="average vote", title=name)
+    return box_fig
+
+
 def generate_table(name, country, year, avg_vote, genre):
     data = database_mysql.filter_movies(country, year, avg_vote, genre)
-    #header_values = list(data[0].keys())
+    # header_values = list(data[0].keys())
     header_values = ["title", "country", "year", "avg_vote", "genre"]
     col_values = [[item[col] for item in data] for col in header_values]
     fig = go.Figure(data=[go.Table(header=dict(values=header_values),
@@ -76,10 +89,13 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
     elif chart_type == 'BAR':
         figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
                               genre)
+    elif chart_type == 'BOX':
+        figure = generate_box_plot(name, group_attribute, country, (lowest_year, largest_year),
+                                   (lowest_avg_vote, 10),
+                                   genre)
     else:
         figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
     return figure
-    
 
 
 def get_attributes(col_name):
@@ -99,14 +115,14 @@ create_dash_component = html.Div([
         dcc.Dropdown(
             id="country",
             options=country_options,
-            value='USA',
+            value='all',
             clearable=False
         ),
         "Genre: ",
         dcc.Dropdown(
             id="genre",
             options=genre_options,
-            value='Action',
+            value='all',
             clearable=False
         ),
         "Lowest Average Vote: ",
@@ -121,6 +137,7 @@ create_dash_component = html.Div([
             options=[
                 {'label': 'country', 'value': 'country'},
                 {'label': 'genre', 'value': 'genre'},
+                {'label': 'year', 'value': 'year'},
                 {'label': 'None', 'value': 'None'},
             ],
             value='country',
@@ -132,6 +149,7 @@ create_dash_component = html.Div([
             options=[
                 {'label': 'bar chart', 'value': 'BAR'},
                 {'label': 'pie chart', 'value': 'PIE'},
+                {'label': 'box plot', 'value': 'BOX'},
                 {'label': 'table', 'value': 'table'}
             ],
             value='BAR',

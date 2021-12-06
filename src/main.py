@@ -101,7 +101,8 @@ def render_page_content(pathname):
     ],
     State("drag_container", "children"), [State(component_id=i, component_property='value') for i in inputs],
 )
-def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year,
+                  group_attribute,
                   chart_type):
     input_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     if "index" in input_id:
@@ -130,7 +131,7 @@ def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, 
                     id={"type": "dynamic-output", "index": n_clicks},
                     style={"height": 300},
                     figure=create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
-                                              group_attribute, chart_type)
+                                                   group_attribute, chart_type)
                 ),
             ]
         )
@@ -143,6 +144,7 @@ def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, 
     #                 n_clicks=0,
     #                 style={"display": "block"},
     #             ),w]) for w in widgets]
+
 
 #  html.Div(
 #         className="six columns",

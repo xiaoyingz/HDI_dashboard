@@ -95,7 +95,7 @@ if __name__ == '__main__':
     expression = "Display a pie chart showing the average vote grouped by country " \
                  "with action as the genre and China as the country"
     print(parser(expression))
-    expression = "Display a pie chart showing the average vote grouped by genre " \
+    expression = "Display a pie chart showing the average vote group by genre " \
                  "with year between 2002 to 2010"
     print(parser(expression))
     expression = "Display a pie chart showing the average vote grouped by country " \

@@ -161,13 +161,14 @@ def filter_group_movies(group_key, country=None, year=None, avg_vote=None, genre
         query += " WHERE "
         query += " AND ".join(conditions)
     query += " GROUP BY {}".format(group_key)
+    query += " ORDER BY COUNT(imdb_title_id) DESC"
     cursor.execute(query, tuple(params))
     counter = []
     for attribute, count in cursor:
         counter.append({'_id': attribute, 'total': count})
     cursor.close()
     cnx.close()
-    return counter
+    return counter[:15]
 
 def filter_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC'):
     """
