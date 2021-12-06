@@ -146,6 +146,8 @@ def create_widget(n_clicks, _, children, tab_children):
                                                    lowest_avg_vote, *parsed["filter"]["year"],
                                                    group_attribute, target_attribute,
                                                    parsed["chart_type"])
+            else:
+                curr_fig = create_dash.generate_table_from_sql(*l)
 
             new_element = html.Div(
                 style={

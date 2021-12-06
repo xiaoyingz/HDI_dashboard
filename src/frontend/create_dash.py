@@ -84,6 +84,16 @@ def generate_table(name, country, year, avg_vote, genre):
     fig.update_layout(title=name)
     return fig
 
+def generate_table_from_sql(expression):
+    data = database_mysql.sql(expression)
+    header_values = list(data[0].keys())
+    # header_values = ["title", "country", "year", "avg_vote", "genre"]
+    col_values = [[item[col] for item in data] for col in header_values]
+    fig = go.Figure(data=[go.Table(header=dict(values=header_values),
+                                   cells=dict(values=col_values))
+                          ])
+    fig.update_layout()
+    return fig
 
 def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
                 chart_type):
@@ -193,12 +203,12 @@ filter_tab_div = html.Div([
 ], id="filter_tab_div")
 
 sql_tab_div = html.Div([
-    dcc.Input(id="sql_input",
-            value = "sql goes here",
-            type='text'),
-    dcc.Input(id="sql_input",
-            value = "222",
-            type='text'),
+    html.H4("Attributes: "),
+    html.H6("imdb_title_id, title, original_title, year, date_published, genre, duration, country, language, director, writer, production_company, actors, description, avg_vote, votes, budget, usa_gross_income, worldwide_gross_income, metascore, reviews_from_users, reviews_from_critics"),
+    dcc.Textarea(id="sql_input",
+            placeholder = "SELECT ... FROM movie",
+            value = "",
+            style={'width': '60%'}),
 ], id="sql_tab_div")
 
 natural_language_tab_div = html.Div([
