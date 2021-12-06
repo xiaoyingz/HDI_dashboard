@@ -11,12 +11,21 @@
   vertical-align: middle;
 }
 
-#chart_type_dropdown{
+#widget_name, #natural_language_input{
+  width: 100%;
+  display: block;
+}
+
+#group_attribute, #chart_type_dropdown{
+  display: inline;
+}
+
+/* #chart_type_dropdown{
   width: 10%;
   height: 50%;
   display: inline-block;
   vertical-align: middle;
-}
+} */
 /* #search_result{
   height: auto;
 } */

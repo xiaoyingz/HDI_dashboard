@@ -146,7 +146,7 @@ def filter_group_movies(group_key, country=None, year=None, avg_vote=None, genre
     if country is not None:
         conditions.append("country = %s")
         params.append(country)
-    if year is not None:
+    if year is not None and year != (0, 0):
         conditions.append("year >= %s AND year <= %s")
         start, end = year
         params.extend([start, end])

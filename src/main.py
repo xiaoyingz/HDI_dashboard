@@ -15,7 +15,7 @@ import json
 from backend import database_mongo
 from backend import database_mysql
 from backend import database_neo4j
-from backend import parser
+from backend import NL_parser
 from frontend import create_dash
 from frontend import overview
 from frontend import schema
@@ -45,7 +45,9 @@ SIDEBAR_STYLE = {
 filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
           "chart_type_dropdown"]
-widgets = []
+# widgets = []
+# widgets_num = 0
+last_num = [0]
 
 sidebar = html.Div(
     [
@@ -99,10 +101,14 @@ def render_page_content(pathname):
         Input('create_state', 'n_clicks'),
         Input({"type": "dynamic-delete", "index": ALL}, "n_clicks"),
     ],
-    State("drag_container", "children"), [State(component_id=i, component_property='value') for i in inputs],
+    State("drag_container", "children"),
+    # [State(component_id=i, component_property='value') for i in inputs],
+    # State({"type": "text", "index": ALL}, "value")
+    [State("create_div", "children")]
 )
-def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
-                  chart_type):
+# def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+#                   chart_type):
+def create_widget(n_clicks, _, children, tab_children):
     input_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     if "index" in input_id:
         delete_chart = json.loads(input_id)["index"]
@@ -112,29 +118,44 @@ def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, 
             if "'index': " + str(delete_chart) not in str(chart)
         ]
     else:
-        new_element = html.Div(
-            style={
-                "width": "100%",
-                "display": "inline-block",
-                "outline": "thin lightgrey solid",
-                "padding": 10,
-            },
-            children=[
-                html.Button(
-                    "X",
-                    id={"type": "dynamic-delete", "index": n_clicks},
-                    n_clicks=0,
-                    style={"display": "block"},
-                ),
-                dcc.Graph(
-                    id={"type": "dynamic-output", "index": n_clicks},
-                    style={"height": 300},
-                    figure=create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
-                                              group_attribute, chart_type)
-                ),
-            ]
-        )
-        children.append(new_element)
+        children_obj = tab_children[1]["props"]["children"]
+        if children_obj:
+            l = []
+            for item in children_obj["props"]["children"]:
+                if type(item) != str:
+                    l.append(item["props"]["value"])
+
+            if children_obj["props"]["id"] == "filter_tab_div":
+                curr_fig = create_dash.dump_widget(*l)
+            elif children_obj["props"]["id"] == "natural_language_tab_div":
+                parsed = NL_parser.parser(*l)
+                lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
+                curr_fig = create_dash.dump_widget('widget'+str(last_num[0]), parsed["filter"]["country"], parsed["filter"]["genre"],
+                                                    lowest_avg_vote, *parsed["filter"]["year"], parsed["group_attribute"], parsed["chart_type"])
+
+            new_element = html.Div(
+                style={
+                    "width": "100%",
+                    "display": "inline-block",
+                    "outline": "thin lightgrey solid",
+                    "padding": 10,
+                },
+                children=[
+                    html.Button(
+                        "X",
+                        id={"type": "dynamic-delete", "index": n_clicks},
+                        n_clicks=0,
+                        style={"display": "block"},
+                    ),
+                    dcc.Graph(
+                        id={"type": "dynamic-output", "index": n_clicks},
+                        style={"height": 300},
+                        figure=curr_fig
+                    ),
+                ]
+            )
+            children.append(new_element)
+            last_num[0] += 1
     return [dbc.Card(w) for w in children]
 
     # return [dbc.Card([html.Button(
@@ -192,6 +213,13 @@ def update_table(input_movie, vote, btn1):
             app1.close()
     return None
 
+@app.callback(Output("tab_content", "children"), [Input("tabs", "active_tab")])
+def switch_tab(at):
+    if at == "Filter-tab":
+        return create_dash.filter_tab_div
+    elif at == "NL-tab":
+        return create_dash.natural_language_tab_div
+    return create_dash.sql_tab_div
 
 if __name__ == '__main__':
     app.run_server(debug=True)
