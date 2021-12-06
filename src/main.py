@@ -128,7 +128,7 @@ def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, 
                 ),
                 dcc.Graph(
                     id={"type": "dynamic-output", "index": n_clicks},
-                    style={"height": 300},
+                    style={"height": 500},
                     figure=create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
                                                    group_attribute, target_attribute, chart_type)
                 ),

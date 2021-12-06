@@ -121,66 +121,76 @@ widgets = []
 country_options = get_attributes("country")
 genre_options = get_attributes("genre")
 create_dash_component = html.Div([
-    html.Div([
-        "Widget name: ",
-        dcc.Input(id='widget_name', value='USA Action Movie with Rating over 7 (2008-2018)', type='text'),
-        "Country: ",
-        dcc.Dropdown(
-            id="country",
-            options=country_options,
-            value='all',
-            clearable=False
-        ),
-        "Genre: ",
-        dcc.Dropdown(
-            id="genre",
-            options=genre_options,
-            value='all',
-            clearable=False
-        ),
-        "Lowest Average Vote: ",
-        dcc.Input(id='lowest_avg_vote', value='7', type='text'),
-        "Year: ",
-        dcc.Input(id='lowest_year', value='2008', type='text'),
-        "To",
-        dcc.Input(id='largest_year', value='2018', type='text'),
-        "Group Attribute: ",
-        dcc.Dropdown(
-            id="group_attribute",
-            options=[
-                {'label': 'country', 'value': 'country'},
-                {'label': 'genre', 'value': 'genre'},
-                {'label': 'year', 'value': 'year'},
-                {'label': 'None', 'value': 'None'},
-            ],
-            value='country',
-            clearable=False
-        ),
-        "Target Attribute(only for heatmap): ",
-        dcc.Dropdown(
-            id="target_attribute",
-            options=[
-                {'label': 'country', 'value': 'country'},
-                {'label': 'genre', 'value': 'genre'},
-                {'label': 'year', 'value': 'year'},
-            ],
-            value='genre',
-            clearable=False
-        ),
-        "Type: ",
-        dcc.Dropdown(
-            id="chart_type_dropdown",
-            options=[
-                {'label': 'bar chart', 'value': 'BAR'},
-                {'label': 'pie chart', 'value': 'PIE'},
-                {'label': 'box plot', 'value': 'BOX'},
-                {'label': 'heatmap', 'value': 'heatmap'},
-                {'label': 'table', 'value': 'table'}
-            ],
-            value='BAR',
-            clearable=False
-        ),
-        html.Button(id='create_state', children='Create', n_clicks=0),
-        html.Div(id="drag_container", className="container", children=[]),
-    ])
+    html.H4("Widget name: "),
+    dcc.Input(id='widget_name', placeholder='Enter the widget name', type='text'),
+    html.Br(),
+    html.Br(),
+    html.H4("Filter: "),
+    "Country: ",
+    dcc.Dropdown(
+        id="country",
+        options=country_options,
+        value='all',
+        clearable=False
+    ),
+    "Genre: ",
+    dcc.Dropdown(
+        id="genre",
+        options=genre_options,
+        value='all',
+        clearable=False
+    ),
+    "Lowest Average Vote: ",
+    dcc.Input(id='lowest_avg_vote', value='7', type='text'),
+    html.Br(),
+    "Year: ",
+    dcc.Input(id='lowest_year', value='2008', type='text'),
+    "To",
+    dcc.Input(id='largest_year', value='2018', type='text'),
+    html.Br(),
+    html.Br(),
+    html.H4("Axes: "),
+    "Group Attribute: ",
+    dcc.Dropdown(
+        id="group_attribute",
+        options=[
+            {'label': 'country', 'value': 'country'},
+            {'label': 'genre', 'value': 'genre'},
+            {'label': 'year', 'value': 'year'},
+            {'label': 'None', 'value': 'None'},
+        ],
+        value='country',
+        clearable=False
+    ),
+    "Target Attribute(only for heatmap): ",
+    dcc.Dropdown(
+        id="target_attribute",
+        options=[
+            {'label': 'country', 'value': 'country'},
+            {'label': 'genre', 'value': 'genre'},
+            {'label': 'year', 'value': 'year'},
+        ],
+        value='genre',
+        clearable=False
+    ),
+    html.Br(),
+    html.Br(),
+    html.H4("Chart Type: "),
+    "Type: ",
+    dcc.Dropdown(
+        id="chart_type_dropdown",
+        options=[
+            {'label': 'bar chart', 'value': 'BAR'},
+            {'label': 'pie chart', 'value': 'PIE'},
+            {'label': 'box plot', 'value': 'BOX'},
+            {'label': 'heatmap', 'value': 'heatmap'},
+            {'label': 'table', 'value': 'table'}
+        ],
+        value='BAR',
+        clearable=False
+    ),
+    html.Button(id='create_state', children='Create', n_clicks=0),
+    html.Br(),
+    html.Br(),
+    html.Div(id="drag_container", className="container", children=[]),
 ])
