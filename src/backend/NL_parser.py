@@ -18,7 +18,7 @@ def parse_chart_type(info, expression):
 def parse_group_attribute(info, expression):
     result = re.findall(r'[\w ]+ (?:group|grouped|grouping) by ([\w ]+)', expression)[0]
     words = result.split(' ')
-    if words[1] == 'and':
+    if len(words) > 1 and words[1] == 'and':
         info['group_attribute'] = (words[0], words[2])
     else:
         info['group_attribute'] = words[0]
@@ -90,15 +90,37 @@ def parser(expression):
     note: range is inclusive
     """
     info = {"chart_type": None, "group_attribute": None,
-            "filter": {"country": None, "year": (0, 0), "avg_vote": None, "genre": None}}
+            "filter": {"country": None, "year": None, "avg_vote": None, "genre": None}}
     parse_chart_type(info, expression)
     if info["chart_type"] != 'table':
         parse_group_attribute(info, expression)
-    filter_expression = expression[expression.find('with') + len('with'):].lstrip()
-    filter_conditions = filter_expression.split(' and ')
-    for filter_condition in filter_conditions:
-        parse_filter(info, filter_condition)
+    if 'with' in expression:
+        filter_expression = expression[expression.find('with') + len('with'):].lstrip()
+        filter_conditions = filter_expression.split(' and ')
+        for filter_condition in filter_conditions:
+            parse_filter(info, filter_condition)
     return info
+
+
+def get_name(parsed):
+    if parsed["chart_type"] in ['PIE', 'BAR']:
+        name = "movies by {}".format(parsed["group_attribute"])
+    elif parsed["chart_type"] == "table":
+        name = "movies"
+    elif parsed["chart_type"] == "BOX":
+        name = "average vote vs {}".format(parsed["group_attribute"])
+    elif parsed["chart_type"] == 'heatmap':
+        name = "movies by {} and {}".format(parsed["group_attribute"][0], parsed["group_attribute"][1])
+    else:
+        name = ""
+    filter_name = " ["
+    for attribute in parsed["filter"]:
+        if parsed["filter"][attribute] is not None:
+            filter_name += "{}:{},".format(attribute, parsed["filter"][attribute])
+    filter_name = filter_name[:-1] + "]"
+    if filter_name == " ]":
+        filter_name = ''
+    return name + filter_name
 
 
 if __name__ == '__main__':

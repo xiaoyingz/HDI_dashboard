@@ -112,6 +112,7 @@ def render_page_content(pathname):
 )
 # def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
 #                   chart_type):
+
 def create_widget(n_clicks, _, children, tab_children):
     global widgets
     # print(n_clicks)
@@ -137,13 +138,15 @@ def create_widget(n_clicks, _, children, tab_children):
             elif children_obj["props"]["id"] == "natural_language_tab_div":
                 parsed = NL_parser.parser(*l)
                 lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
+                year = parsed["filter"]["year"] if parsed["filter"]["year"] else (1900, 2021)
                 if type(parsed["group_attribute"]) == tuple:
                     group_attribute, target_attribute = parsed["group_attribute"][0], parsed["group_attribute"][1]
                 else:
                     group_attribute, target_attribute = parsed["group_attribute"], None
-                curr_fig = create_dash.dump_widget('widget' + str(last_num[0]), parsed["filter"]["country"],
+                name = NL_parser.get_name(parsed)
+                curr_fig = create_dash.dump_widget(name, parsed["filter"]["country"],
                                                    parsed["filter"]["genre"],
-                                                   lowest_avg_vote, *parsed["filter"]["year"],
+                                                   lowest_avg_vote, *year,
                                                    group_attribute, target_attribute,
                                                    parsed["chart_type"])
             else:
