@@ -17,7 +17,8 @@ app = dash.Dash(
 
 
 class Widget:
-    def __init__(self, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type):
+    def __init__(self, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+                 target_attribute, chart_type):
         self.name = name
         self.country = country
         self.genre = genre
@@ -25,6 +26,7 @@ class Widget:
         self.lowest_year = lowest_year
         self.largest_year = largest_year
         self.group_attribute = group_attribute
+        self.target_attribute = target_attribute
         self.chart_type = chart_type
 
 
@@ -34,8 +36,6 @@ def widgetJsonDecod(messageDict):
 
 def generate_pie(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
-    if group_key == 'avg_vote':
-        data = aggregate_average_vote(data)
     pie_data = {group_key: [], "counts": []}
     for item in data:
         pie_data[group_key].append(item["_id"])
@@ -44,11 +44,9 @@ def generate_pie(name, group_key, country, year, avg_vote, genre):
     return pie_fig
 
 
-def generate_bar(name, group_key, country, year, avg_vote, genre, max_bars=15):
+def generate_bar(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_group_movies(group_key, country, year, avg_vote, genre)
-    if group_key == 'avg_vote':
-        data = aggregate_average_vote(data)
-    length = min(len(data), max_bars)
+    length = len(data)
     bar_data = {group_key: [data[i]["_id"] for i in range(length)],
                 "count": [data[i]["total"] for i in range(length)]
                 }
@@ -65,6 +63,16 @@ def generate_box_plot(name, group_key, country, year, avg_vote, genre):
     return box_fig
 
 
+def generate_heatmap(name, group_key, country, year, avg_vote, genre):
+    data = database_mysql.filter_group_movies_2D((group_key[0], group_key[1]), country, year, avg_vote, genre)
+    heatmap_data = {group_key[0]: [item[group_key[0]] for item in data],
+                    group_key[1]: [item[group_key[1]] for item in data],
+                    "count": [item["total"] for item in data]
+                    }
+    heatmap_fig = px.density_heatmap(heatmap_data, x=group_key[0], y=group_key[1], title=name)
+    return heatmap_fig
+
+
 def generate_table(name, country, year, avg_vote, genre):
     data = database_mysql.filter_movies(country, year, avg_vote, genre)
     # header_values = list(data[0].keys())
@@ -77,7 +85,8 @@ def generate_table(name, country, year, avg_vote, genre):
     return fig
 
 
-def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, chart_type):
+def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
+                chart_type):
     if country == 'all':
         country = None
     if genre == 'all':
@@ -93,6 +102,10 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
         figure = generate_box_plot(name, group_attribute, country, (lowest_year, largest_year),
                                    (lowest_avg_vote, 10),
                                    genre)
+    elif chart_type == 'heatmap':
+        figure = generate_heatmap(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
+                                  (lowest_avg_vote, 10),
+                                  genre)
     else:
         figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
     return figure
@@ -143,6 +156,17 @@ create_dash_component = html.Div([
             value='country',
             clearable=False
         ),
+        "Target Attribute(only for heatmap): ",
+        dcc.Dropdown(
+            id="target_attribute",
+            options=[
+                {'label': 'country', 'value': 'country'},
+                {'label': 'genre', 'value': 'genre'},
+                {'label': 'year', 'value': 'year'},
+            ],
+            value='genre',
+            clearable=False
+        ),
         "Type: ",
         dcc.Dropdown(
             id="chart_type_dropdown",
@@ -150,6 +174,7 @@ create_dash_component = html.Div([
                 {'label': 'bar chart', 'value': 'BAR'},
                 {'label': 'pie chart', 'value': 'PIE'},
                 {'label': 'box plot', 'value': 'BOX'},
+                {'label': 'heatmap', 'value': 'heatmap'},
                 {'label': 'table', 'value': 'table'}
             ],
             value='BAR',

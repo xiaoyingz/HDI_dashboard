@@ -170,6 +170,40 @@ def filter_group_movies(group_key, country=None, year=None, avg_vote=None, genre
     cnx.close()
     return counter[:15]
 
+
+def filter_group_movies_2D(group_key, country=None, year=None, avg_vote=None, genre=None):
+    cnx, cursor = get_cursor()
+    query = "SELECT {}, {} , COUNT(imdb_title_id) FROM movie ".format(group_key[0], group_key[1])
+    conditions = []
+    params = []
+    if country is not None:
+        conditions.append("country = %s")
+        params.append(country)
+    if year is not None:
+        conditions.append("year >= %s AND year <= %s")
+        start, end = year
+        params.extend([start, end])
+    if genre is not None:
+        conditions.append("genre = %s")
+        params.append(genre)
+    if avg_vote is not None:
+        conditions.append("avg_vote >= %s AND avg_vote <= %s")
+        start, end = avg_vote
+        params.extend([start, end])
+    if conditions:
+        query += " WHERE "
+        query += " AND ".join(conditions)
+    query += " GROUP BY {}, {}".format(group_key[0], group_key[1])
+    query += " ORDER BY COUNT(imdb_title_id) DESC"
+    cursor.execute(query, tuple(params))
+    counter = []
+    for attribute1, attribute2, count in cursor:
+        counter.append({group_key[0]: attribute1, group_key[1]: attribute2, 'total': count})
+    cursor.close()
+    cnx.close()
+    return counter
+
+
 def filter_movies(country=None, year=None, avg_vote=None, genre=None, order='DESC'):
     """
     :return: a list of dictionary with key as field name
@@ -205,6 +239,7 @@ def filter_movies(country=None, year=None, avg_vote=None, genre=None, order='DES
     cnx.close()
     return res
 
+
 if __name__ == '__main__':
     # movies = get_movies(country='USA', year=2010, genre="Drama", avg_vote=(6, 8))
     # print(movies)
@@ -222,4 +257,5 @@ if __name__ == '__main__':
     # print(movie)
     # print(get_movies(country='Brazil', year=1985, avg_vote=(5,8), genre='Drama'))
     # print(get_category_attribute_options("country"))
-    print(filter_group_movies(group_key='country', country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
+    #print(filter_group_movies(group_key='country', country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))
+    print(filter_group_movies_2D(group_key=('country', 'genre'), country=None, year=(1985, 2000), avg_vote=(5, 8), genre='Drama'))

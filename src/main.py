@@ -44,7 +44,7 @@ SIDEBAR_STYLE = {
 
 filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
-          "chart_type_dropdown"]
+          "target_attribute", "chart_type_dropdown"]
 widgets = []
 
 sidebar = html.Div(
@@ -102,8 +102,7 @@ def render_page_content(pathname):
     State("drag_container", "children"), [State(component_id=i, component_property='value') for i in inputs],
 )
 def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, lowest_year, largest_year,
-                  group_attribute,
-                  chart_type):
+                  group_attribute, target_attribute, chart_type):
     input_id = dash.callback_context.triggered[0]["prop_id"].split(".")[0]
     if "index" in input_id:
         delete_chart = json.loads(input_id)["index"]
@@ -131,7 +130,7 @@ def create_widget(n_clicks, _, children, name, country, genre, lowest_avg_vote, 
                     id={"type": "dynamic-output", "index": n_clicks},
                     style={"height": 300},
                     figure=create_dash.dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year,
-                                                   group_attribute, chart_type)
+                                                   group_attribute, target_attribute, chart_type)
                 ),
             ]
         )
