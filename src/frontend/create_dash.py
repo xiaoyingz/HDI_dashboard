@@ -56,10 +56,15 @@ def generate_bar(name, group_key, country, year, avg_vote, genre):
 
 def generate_box_plot(name, group_key, country, year, avg_vote, genre):
     data = database_mysql.filter_movies(country, year, avg_vote, genre)
-    box_data = {group_key: [item[group_key] for item in data],
-                "average vote": [item["avg_vote"] for item in data]
-                }
-    box_fig = px.box(box_data, x=group_key, y="average vote", title=name)
+    if group_key[1] not in ["avg_vote", "metascore"]:
+        box_data = {group_key[0]: [item[group_key[0]] for item in data if item[group_key[1]][0] == '$'],
+                    group_key[1]: [int(item[group_key[1]][2:]) for item in data if item[group_key[1]][0] == '$']
+                    }
+    else:
+        box_data = {group_key[0]: [item[group_key[0]] for item in data],
+                    group_key[1]: [item[group_key[1]] for item in data]
+                    }
+    box_fig = px.box(box_data, x=group_key[0], y=group_key[1], title=name)
     return box_fig
 
 
@@ -76,13 +81,15 @@ def generate_heatmap(name, group_key, country, year, avg_vote, genre):
 def generate_table(name, country, year, avg_vote, genre):
     data = database_mysql.filter_movies(country, year, avg_vote, genre)
     # header_values = list(data[0].keys())
-    header_values = ["title", "country", "year", "avg_vote", "genre"]
+    header_values = ["title", "country", "year", "genre", "director", "production_company", "avg_vote", "budget",
+                     "worldwide_gross_income"]
     col_values = [[item[col] for item in data] for col in header_values]
     fig = go.Figure(data=[go.Table(header=dict(values=header_values),
                                    cells=dict(values=col_values))
                           ])
     fig.update_layout(title=name)
     return fig
+
 
 def generate_table_from_sql(expression):
     data = database_mysql.sql(expression)
@@ -94,6 +101,7 @@ def generate_table_from_sql(expression):
                           ])
     fig.update_layout()
     return fig
+
 
 def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
                 chart_type):
@@ -109,7 +117,7 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
         figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
                               genre)
     elif chart_type == 'BOX':
-        figure = generate_box_plot(name, group_attribute, country, (lowest_year, largest_year),
+        figure = generate_box_plot(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
                                    (lowest_avg_vote, 10),
                                    genre)
     elif chart_type == 'heatmap':
@@ -120,12 +128,15 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
         figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
     return figure
 
+
 def get_attributes(col_name):
     values = database_mysql.get_category_attribute_options(col_name)
     return [{"label": "all", 'value': "all"}] + [{"label": value, 'value': value} for value in values]
 
+
 def generate_tab(label):
-    return dbc.Tab(label=label, tab_id=label+"-tab")
+    return dbc.Tab(label=label, tab_id=label + "-tab")
+
 
 inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "chart_type_dropdown"]
 widgets = []
@@ -169,17 +180,28 @@ filter_tab_div = html.Div([
             {'label': 'country', 'value': 'country'},
             {'label': 'genre', 'value': 'genre'},
             {'label': 'year', 'value': 'year'},
+            {'label': 'production_company', 'value': 'production_company'},
+            {'label': 'director', 'value': 'director'},
+            {'label': 'writer', 'value': 'writer'},
         ],
         value='country',
         clearable=False
     ),
-    "Target Attribute(only for heatmap): ",
+    "Target Attribute(top 6 for heatmap and bottom 5 for box plot): ",
     dcc.Dropdown(
         id="target_attribute",
         options=[
             {'label': 'country', 'value': 'country'},
             {'label': 'genre', 'value': 'genre'},
             {'label': 'year', 'value': 'year'},
+            {'label': 'production_company', 'value': 'production_company'},
+            {'label': 'director', 'value': 'director'},
+            {'label': 'writer', 'value': 'writer'},
+            {'label': 'average vote', 'value': 'avg_vote'},
+            {'label': 'metascore', 'value': 'metascore'},
+            {'label': 'worldwide gross income', 'value': 'worldwide_gross_income'},
+            {'label': 'USA gross income', 'value': 'usa_gross_income'},
+            {'label': 'budget', 'value': 'budget'},
         ],
         value='genre',
         clearable=False
@@ -204,20 +226,21 @@ filter_tab_div = html.Div([
 
 sql_tab_div = html.Div([
     html.H4("Attributes: "),
-    html.H6("imdb_title_id, title, original_title, year, date_published, genre, duration, country, language, director, writer, production_company, actors, description, avg_vote, votes, budget, usa_gross_income, worldwide_gross_income, metascore, reviews_from_users, reviews_from_critics"),
+    html.H6(
+        "imdb_title_id, title, original_title, year, date_published, genre, duration, country, language, director, writer, production_company, actors, description, avg_vote, votes, budget, usa_gross_income, worldwide_gross_income, metascore, reviews_from_users, reviews_from_critics"),
     dcc.Textarea(id="sql_input",
-            placeholder = "SELECT ... FROM movie",
-            value = "",
-            style={'width': '60%'}),
+                 placeholder="SELECT ... FROM movie",
+                 value="",
+                 style={'width': '60%'}),
 ], id="sql_tab_div")
 
 natural_language_tab_div = html.Div([
     dcc.Input(id="natural_language_input",
-            value = "Display a bar chart showing the distribution group by genre with year between 2002 to 2010",
-            type='text')
+              value="Display a bar chart showing the distribution group by genre with year between 2002 to 2010",
+              type='text')
 ], id="natural_language_tab_div")
 
-tabs = html.Div(id="create_div",children=[
+tabs = html.Div(id="create_div", children=[
     dbc.Tabs(
         [
             generate_tab("Filter"),
@@ -231,7 +254,7 @@ tabs = html.Div(id="create_div",children=[
 ])
 
 create_dash_component = html.Div([
-        tabs,
-        html.Button(id='create_state', children='Create', n_clicks=0),
-        html.Div(id="drag_container", className="container", children=[]),
+    tabs,
+    html.Button(id='create_state', children='Create', n_clicks=0),
+    html.Div(id="drag_container", className="container", children=[]),
 ])

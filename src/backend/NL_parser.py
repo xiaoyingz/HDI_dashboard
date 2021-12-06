@@ -20,6 +20,11 @@ def parse_group_attribute(info, expression):
     words = result.split(' ')
     if len(words) > 1 and words[1] == 'and':
         info['group_attribute'] = (words[0], words[2])
+    elif 'box plot' in expression:
+        for attribute in ['avg_vote', 'budget', 'metascore', 'worldwide_gross_income', 'usa_gross_income']:
+            if attribute in expression:
+                info['group_attribute'] = (words[0], attribute)
+                break
     else:
         info['group_attribute'] = words[0]
 
@@ -108,7 +113,7 @@ def get_name(parsed):
     elif parsed["chart_type"] == "table":
         name = "movies"
     elif parsed["chart_type"] == "BOX":
-        name = "average vote vs {}".format(parsed["group_attribute"])
+        name = "{} vs {}".format(parsed["group_attribute"][1], parsed["group_attribute"][0])
     elif parsed["chart_type"] == 'heatmap':
         name = "movies by {} and {}".format(parsed["group_attribute"][0], parsed["group_attribute"][1])
     else:

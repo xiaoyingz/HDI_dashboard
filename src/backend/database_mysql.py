@@ -10,8 +10,8 @@ from pathlib import Path
 # password=os.getenv('PASSWORD')
 
 def get_cursor():
-    # cnx = mysql.connector.connect(user='root', database='mp')
-    cnx = mysql.connector.connect(user='root', database='cs511movie', password='88888888')
+    cnx = mysql.connector.connect(user='root', database='mp')
+    #cnx = mysql.connector.connect(user='root', database='mp', password='88888888')
     cursor = cnx.cursor()
     return cnx, cursor
 
@@ -169,7 +169,7 @@ def filter_group_movies(group_key, country=None, year=None, avg_vote=None, genre
         counter.append({'_id': attribute, 'total': count})
     cursor.close()
     cnx.close()
-    return counter[:15]
+    return counter[:20]
 
 
 def filter_group_movies_2D(group_key, country=None, year=None, avg_vote=None, genre=None):
