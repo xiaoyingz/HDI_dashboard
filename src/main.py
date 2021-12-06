@@ -45,7 +45,7 @@ SIDEBAR_STYLE = {
 
 filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
 inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
-          "chart_type_dropdown"]
+          "target_attribute", "chart_type_dropdown"]
 widgets = []
 # widgets_num = 0
 last_num = [0]
@@ -128,17 +128,24 @@ def create_widget(n_clicks, _, children, tab_children):
         if children_obj:
             l = []
             for item in children_obj["props"]["children"]:
-                if type(item) != str:
+                if type(item) != str and "value" in item["props"]:
                     l.append(item["props"]["value"])
+                    print(item["props"]["value"])
 
             if children_obj["props"]["id"] == "filter_tab_div":
-                l.insert(7, None)
                 curr_fig = create_dash.dump_widget(*l)
             elif children_obj["props"]["id"] == "natural_language_tab_div":
                 parsed = NL_parser.parser(*l)
                 lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
-                curr_fig = create_dash.dump_widget('widget'+str(last_num[0]), parsed["filter"]["country"], parsed["filter"]["genre"],
-                                                    lowest_avg_vote, *parsed["filter"]["year"], parsed["group_attribute"], None, parsed["chart_type"])
+                if type(parsed["group_attribute"]) == tuple:
+                    group_attribute, target_attribute = parsed["group_attribute"][0], parsed["group_attribute"][1]
+                else:
+                    group_attribute, target_attribute = parsed["group_attribute"], None
+                curr_fig = create_dash.dump_widget('widget' + str(last_num[0]), parsed["filter"]["country"],
+                                                   parsed["filter"]["genre"],
+                                                   lowest_avg_vote, *parsed["filter"]["year"],
+                                                   group_attribute, target_attribute,
+                                                   parsed["chart_type"])
 
             new_element = html.Div(
                 style={
@@ -156,7 +163,7 @@ def create_widget(n_clicks, _, children, tab_children):
                     ),
                     dcc.Graph(
                         id={"type": "dynamic-output", "index": n_clicks},
-                        style={"height": 300},
+                        style={"height": 500},
                         figure=curr_fig
                     ),
                 ]
@@ -221,6 +228,7 @@ def update_table(input_movie, vote, btn1):
             app1.close()
     return None
 
+
 @app.callback(Output("tab_content", "children"), [Input("tabs", "active_tab")])
 def switch_tab(at):
     if at == "Filter-tab":
@@ -228,6 +236,7 @@ def switch_tab(at):
     elif at == "NL-tab":
         return create_dash.natural_language_tab_div
     return create_dash.sql_tab_div
+
 
 @app.callback(
     Output("dummy2", "children"),
@@ -237,11 +246,11 @@ def switch_tab(at):
 def update_table(input_movie, vote, btn2):
     # print(n_clicks)
     # print(vote)
-    if btn2>0:
+    if btn2 > 0:
         temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
-        if temp_dict!=None:
+        if temp_dict != None:
             temp_id = temp_dict['imdb_title_id']
-            new_rating = database_mongo.update_rating(temp_id, vote,value = -1)
+            new_rating = database_mongo.update_rating(temp_id, vote, value=-1)
             res = database_mysql.update_avg_vote(temp_id, new_rating)
             print(res)
             app1 = database_neo4j.App()
@@ -257,9 +266,9 @@ def update_table(input_movie, vote, btn2):
     Input("dummy2", "children"))
 def update_table(input_movie, n_clicks, adas):
     movie_dict = database_mysql.get_id_by_name("{}".format(input_movie))
-    if movie_dict==None:
-        fig1=go.Figure(go.Table(
-            header = dict(values=['Movie Not Found'])))
+    if movie_dict == None:
+        fig1 = go.Figure(go.Table(
+            header=dict(values=['Movie Not Found'])))
     else:
         del movie_dict['metascore']
         del movie_dict['reviews_from_users']
@@ -270,30 +279,30 @@ def update_table(input_movie, n_clicks, adas):
         movie_dict['global_income'] = movie_dict.pop('worldwide_gross_income')
         movie_dict['company'] = movie_dict.pop('production_company')
         fig1 = go.Figure(data=[go.Table(
-            header = dict(values = [[i] for i in movie_dict.keys()], fill_color='paleturquoise',
-                    align='left'),
-            cells = dict(values = [[i] for i in movie_dict.values()], fill_color='lavender',
-                align='left')
-            )
-            ])
+            header=dict(values=[[i] for i in movie_dict.keys()], fill_color='paleturquoise',
+                        align='left'),
+            cells=dict(values=[[i] for i in movie_dict.values()], fill_color='lavender',
+                       align='left')
+        )
+        ])
         # fig1.update_layout(width=1900)
         fig1.update_layout(margin=dict(l=20, r=20, t=20, b=20))
     return fig1
+
 
 @app.callback(
     Output('vote_distribution', 'figure'),
     Input("input_movie", "value"),
     Input("dummy1", "children"),
     Input("dummy2", "children"))
-
-def update_figure1(input_movie, dummy1,adfasf):
+def update_figure1(input_movie, dummy1, adfasf):
     temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
-    if temp_dict==None:
-        fig =  px.bar()
+    if temp_dict == None:
+        fig = px.bar()
     else:
         temp_id = temp_dict['imdb_title_id']
         data = database_mongo.get_votes_by_id(temp_id)
-        fig =  px.bar(data, x="field", y="value")
+        fig = px.bar(data, x="field", y="value")
         fig.update_layout(margin=dict(l=0, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
     return fig
 
@@ -304,9 +313,7 @@ def update_figure1(input_movie, dummy1,adfasf):
     Input("input_name", "value"),
     Input("dummy1", "children"),
     Input("dummy2", "children"))
-
-def update_figure(selected_year, input_name, n_clicks,adfds):
-
+def update_figure(selected_year, input_name, n_clicks, adfds):
     app1 = database_neo4j.App()
     df = app1.find_movie_from_person("{}".format(input_name))
     app1.close()
@@ -314,22 +321,12 @@ def update_figure(selected_year, input_name, n_clicks,adfds):
     filtered_df = df[df.year >= selected_year]
 
     fig = px.scatter(filtered_df, x="year", y="rating",
-                 size="rating", color="worktype", hover_name="title",
-                 log_x=False, size_max=10)
+                     size="rating", color="worktype", hover_name="title",
+                     log_x=False, size_max=10)
 
     fig.update_layout(transition_duration=500)
 
     return fig
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':

@@ -92,10 +92,10 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
     if genre == 'all':
         genre = None
     figure = None
-    if chart_type == 'pie chart':
+    if chart_type == 'PIE':
         figure = generate_pie(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
                               genre)
-    elif chart_type == 'bar chart':
+    elif chart_type == 'BAR':
         figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
                               genre)
     elif chart_type == 'BOX':
@@ -123,8 +123,11 @@ country_options = get_attributes("country")
 genre_options = get_attributes("genre")
 
 filter_tab_div = html.Div([
-    "Widget name: ",
-    dcc.Input(id='widget_name', value='Action Movie with Rating over 7 (2008-2018)', type='text'),
+    html.H4("Widget name: "),
+    dcc.Input(id='widget_name', value='widget', type='text'),
+    html.Br(),
+    html.Br(),
+    html.H4("Filter: "),
     "Country: ",
     dcc.Dropdown(
         id="country",
@@ -136,35 +139,55 @@ filter_tab_div = html.Div([
     dcc.Dropdown(
         id="genre",
         options=genre_options,
-        value='Action',
+        value='all',
         clearable=False
     ),
     "Lowest Average Vote: ",
     dcc.Input(id='lowest_avg_vote', value='7', type='text'),
+    html.Br(),
     "Year: ",
     dcc.Input(id='lowest_year', value='2008', type='text'),
     "To",
     dcc.Input(id='largest_year', value='2018', type='text'),
-    "Group Attribute: ",
+    html.Br(),
+    html.Br(),
+    html.H4("Axes: "),
+    "Group Attribute(not for table): ",
     dcc.Dropdown(
         id="group_attribute",
         options=[
             {'label': 'country', 'value': 'country'},
             {'label': 'genre', 'value': 'genre'},
-            {'label': 'None', 'value': 'None'},
+            {'label': 'year', 'value': 'year'},
         ],
         value='country',
         clearable=False
     ),
+    "Target Attribute(only for heatmap): ",
+    dcc.Dropdown(
+        id="target_attribute",
+        options=[
+            {'label': 'country', 'value': 'country'},
+            {'label': 'genre', 'value': 'genre'},
+            {'label': 'year', 'value': 'year'},
+        ],
+        value='genre',
+        clearable=False
+    ),
+    html.Br(),
+    html.Br(),
+    html.H4("Chart Type: "),
     "Type: ",
     dcc.Dropdown(
         id="chart_type_dropdown",
         options=[
-            {'label': 'bar chart', 'value': 'bar chart'},
-            {'label': 'pie chart', 'value': 'pie chart'},
+            {'label': 'bar chart', 'value': 'BAR'},
+            {'label': 'pie chart', 'value': 'PIE'},
+            {'label': 'box plot', 'value': 'BOX'},
+            {'label': 'heatmap', 'value': 'heatmap'},
             {'label': 'table', 'value': 'table'}
         ],
-        value='bar chart',
+        value='BAR',
         clearable=False
     ),
 ], id="filter_tab_div")

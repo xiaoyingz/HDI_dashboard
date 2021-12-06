@@ -4,11 +4,11 @@ from backend.database_mysql import get_category_attribute_options
 
 def parse_chart_type(info, expression):
     if "pie chart" in expression:
-        info["chart_type"] = "pie chart"
+        info["chart_type"] = "PIE"
     elif "bar chart" in expression:
-        info["chart_type"] = "bar chart"
+        info["chart_type"] = "BAR"
     elif 'box plot' in expression:
-        info["chart_type"] = "box plot"
+        info["chart_type"] = "BOX"
     elif 'heatmap' in expression:
         info['chart_type'] = 'heatmap'
     else:
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     expression = "Display a bar chart showing the distribution group by genre " \
                  "with year between 2002 to 2010"
     print(parser(expression))
-    expression = "Display a heatmap showing the average vote grouped by country and genre " \
+    expression = "Display a heatmap showing the count grouped by country and genre " \
                  "with year greater than or equal to 2010"
     print(parser(expression))
     expression = "Display a box plot showing the distribution of average vote grouped by country " \
