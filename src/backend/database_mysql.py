@@ -10,7 +10,7 @@ from pathlib import Path
 # password=os.getenv('PASSWORD')
 
 def get_cursor():
-    cnx = mysql.connector.connect(user='root', database='mp')
+    cnx = mysql.connector.connect(user='root', database='cs511movie', password='88888888')
     cursor = cnx.cursor()
     return cnx, cursor
 

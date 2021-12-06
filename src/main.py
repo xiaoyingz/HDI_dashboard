@@ -18,6 +18,7 @@ from backend import database_neo4j
 from backend import parser
 from frontend import create_dash
 from frontend import overview
+from frontend import check_ur_interest
 from frontend import schema
 
 app = dash.Dash(
@@ -57,6 +58,7 @@ sidebar = html.Div(
         dbc.Nav(
             [
                 dbc.NavLink("Overview", href="/", active="exact"),
+                dbc.NavLink("Search your interest", href="/check_ur_interest", active="exact"),
                 dbc.NavLink("Create your own", href="/create-your-own", active="exact"),
                 dbc.NavLink("More", href="/more", active="exact"),
             ],
@@ -89,6 +91,8 @@ app.clientside_callback(
 def render_page_content(pathname):
     if pathname == "/":
         return overview.overview_component
+    elif pathname == "/check_ur_interest":
+        return check_ur_interest.interest_component
     elif pathname == "/create-your-own":
         return create_dash.create_dash_component
 
@@ -192,6 +196,109 @@ def update_table(input_movie, vote, btn1):
             app1.update_rating(temp_id, new_rating)
             app1.close()
     return None
+
+
+@app.callback(
+    Output("dummy2", "children"),
+    State("input_movie", "value"),
+    State("vote", "value"),
+    Input("revoke-button-state", "n_clicks"))
+def update_table(input_movie, vote, btn2):
+    # print(n_clicks)
+    # print(vote)
+    if btn2>0:
+        temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+        if temp_dict!=None:
+            temp_id = temp_dict['imdb_title_id']
+            new_rating = database_mongo.update_rating(temp_id, vote,value = -1)
+            res = database_mysql.update_avg_vote(temp_id, new_rating)
+            print(res)
+            app1 = database_neo4j.App()
+            app1.update_rating(temp_id, new_rating)
+            app1.close()
+    return None
+
+
+@app.callback(
+    Output('movie_table', 'figure'),
+    Input("input_movie", "value"),
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
+def update_table(input_movie, n_clicks, adas):
+    movie_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+    if movie_dict==None:
+        fig1=go.Figure(go.Table(
+            header = dict(values=['Movie Not Found'])))
+    else:
+        del movie_dict['metascore']
+        del movie_dict['reviews_from_users']
+        del movie_dict['reviews_from_critics']
+        del movie_dict['usa_gross_income']
+        del movie_dict['imdb_title_id']
+        del movie_dict['description']
+        movie_dict['global_income'] = movie_dict.pop('worldwide_gross_income')
+        movie_dict['company'] = movie_dict.pop('production_company')
+        fig1 = go.Figure(data=[go.Table(
+            header = dict(values = [[i] for i in movie_dict.keys()], fill_color='paleturquoise',
+                    align='left'),
+            cells = dict(values = [[i] for i in movie_dict.values()], fill_color='lavender',
+                align='left')
+            )
+            ])
+        # fig1.update_layout(width=1900)
+        fig1.update_layout(margin=dict(l=20, r=20, t=20, b=20))
+    return fig1
+
+@app.callback(
+    Output('vote_distribution', 'figure'),
+    Input("input_movie", "value"),
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
+
+def update_figure1(input_movie, dummy1,adfasf):
+    temp_dict = database_mysql.get_id_by_name("{}".format(input_movie))
+    if temp_dict==None:
+        fig =  px.bar()
+    else:
+        temp_id = temp_dict['imdb_title_id']
+        data = database_mongo.get_votes_by_id(temp_id)
+        fig =  px.bar(data, x="field", y="value")
+        fig.update_layout(margin=dict(l=0, r=20, t=20, b=20), paper_bgcolor="LightSteelBlue")
+    return fig
+
+
+@app.callback(
+    Output('graph-with-slider', 'figure'),
+    Input('year-slider', 'value'),
+    Input("input_name", "value"),
+    Input("dummy1", "children"),
+    Input("dummy2", "children"))
+
+def update_figure(selected_year, input_name, n_clicks,adfds):
+
+    app1 = database_neo4j.App()
+    df = app1.find_movie_from_person("{}".format(input_name))
+    app1.close()
+
+    filtered_df = df[df.year >= selected_year]
+
+    fig = px.scatter(filtered_df, x="year", y="rating",
+                 size="rating", color="worktype", hover_name="title",
+                 log_x=False, size_max=10)
+
+    fig.update_layout(transition_duration=500)
+
+    return fig
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

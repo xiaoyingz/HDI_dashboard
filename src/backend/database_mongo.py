@@ -7,8 +7,8 @@ from pymongo import MongoClient
 import dotenv
 from pathlib import Path
 
-dotenv_path = Path('/Users/zhuxiaoying/Desktop/cs511_project/.env')
-env = dotenv.load_dotenv(dotenv_path='/Users/zhuxiaoying/Desktop/cs511_project/.env', verbose=True, override=False)
+dotenv_path = Path('.env')
+env = dotenv.load_dotenv(dotenv_path='.env', verbose=True, override=False)
 MONGOURL = os.getenv('MONGOURL')
 DOUBLE_ATTRI = ['weighted_average_vote', 'mean_vote']
 INT_ATTRI = ['total_votes']
