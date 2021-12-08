@@ -44,7 +44,7 @@ SIDEBAR_STYLE = {
 }
 
 filters = ['country_filter', 'year_filter', 'genre_filter', 'low_rating_filter', 'high_rating_filter', 'sort_dropdown']
-inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "lowest_year", "largest_year", "group_attribute",
+inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "highest_avg_vote", "lowest_year", "largest_year", "group_attribute",
           "target_attribute", "chart_type_dropdown"]
 widgets = []
 # widgets_num = 0
@@ -136,8 +136,22 @@ def create_widget(n_clicks, _, children, tab_children):
                 curr_fig = create_dash.dump_widget(*l)
             elif children_obj["props"]["id"] == "natural_language_tab_div":
                 parsed = NL_parser.parser(*l)
-                lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
-                year = parsed["filter"]["year"] if parsed["filter"]["year"] else (1900, 2021)
+                if parsed["filter"]["year"]:
+                    year = parsed["filter"]["year"]
+                    if not parsed["filter"]["year"][0]:
+                        year = (1900, parsed["filter"]["year"][1])
+                    if not parsed["filter"]["year"][1]:
+                        year = (parsed["filter"]["year"][0], 2021)
+                else:
+                    year = (1900, 2021)
+                if parsed["filter"]["avg_vote"]:
+                    avg_vote = parsed["filter"]["avg_vote"]
+                    if not parsed["filter"]["avg_vote"][0]:
+                        avg_vote = (0, parsed["filter"]["avg_vote"][1])
+                    if not parsed["filter"]["avg_vote"][1]:
+                        avg_vote = (parsed["filter"]["avg_vote"][0], 10)
+                else:
+                    avg_vote = (0, 10)
                 if type(parsed["group_attribute"]) == tuple:
                     group_attribute, target_attribute = parsed["group_attribute"][0], parsed["group_attribute"][1]
                 else:
@@ -145,7 +159,7 @@ def create_widget(n_clicks, _, children, tab_children):
                 name = NL_parser.get_name(parsed)
                 curr_fig = create_dash.dump_widget(name, parsed["filter"]["country"],
                                                    parsed["filter"]["genre"],
-                                                   lowest_avg_vote, *year,
+                                                   *avg_vote, *year,
                                                    group_attribute, target_attribute,
                                                    parsed["chart_type"])
             else:
