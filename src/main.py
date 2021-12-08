@@ -137,7 +137,16 @@ def create_widget(n_clicks, _, children, tab_children):
             elif children_obj["props"]["id"] == "natural_language_tab_div":
                 parsed = NL_parser.parser(*l)
                 lowest_avg_vote = 0 if not parsed["filter"]["avg_vote"] else parsed["filter"]["avg_vote"][0]
-                year = parsed["filter"]["year"] if parsed["filter"]["year"] else (1900, 2021)
+                if parsed["filter"]["year"]:
+                    year = parsed["filter"]["year"]
+                    if not parsed["filter"]["year"][0]:
+                        year = (1900, parsed["filter"]["year"][1])
+                    if not parsed["filter"]["year"][1]:
+                        year = (parsed["filter"]["year"][0], 2021)
+                else:
+                    year = (1900, 2021)
+                # year = parsed["filter"]["year"] if parsed["filter"]["year"] else (1900, 2021)
+                
                 if type(parsed["group_attribute"]) == tuple:
                     group_attribute, target_attribute = parsed["group_attribute"][0], parsed["group_attribute"][1]
                 else:
