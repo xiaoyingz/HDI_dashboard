@@ -17,12 +17,13 @@ app = dash.Dash(
 
 
 class Widget:
-    def __init__(self, name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute,
+    def __init__(self, name, country, genre, lowest_avg_vote, highest_avg_vote, lowest_year, largest_year, group_attribute,
                  target_attribute, chart_type):
         self.name = name
         self.country = country
         self.genre = genre
         self.lowest_avg_vote = lowest_avg_vote
+        self.highest_avg_vote = highest_avg_vote
         self.lowest_year = lowest_year
         self.largest_year = largest_year
         self.group_attribute = group_attribute
@@ -117,7 +118,7 @@ def generate_table_from_sql(expression):
     return fig
 
 
-def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
+def dump_widget(name, country, genre, lowest_avg_vote, highest_avg_vote, lowest_year, largest_year, group_attribute, target_attribute,
                 chart_type):
     if country == 'all':
         country = None
@@ -125,25 +126,25 @@ def dump_widget(name, country, genre, lowest_avg_vote, lowest_year, largest_year
         genre = None
     figure = None
     if chart_type == 'PIE':
-        figure = generate_pie(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
+        figure = generate_pie(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, highest_avg_vote),
                               genre)
     elif chart_type == 'BAR':
-        figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, 10),
+        figure = generate_bar(name, group_attribute, country, (lowest_year, largest_year), (lowest_avg_vote, highest_avg_vote),
                               genre)
     elif chart_type == 'BOX':
         figure = generate_box_plot(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
-                                   (lowest_avg_vote, 10),
+                                   (lowest_avg_vote, highest_avg_vote),
                                    genre)
     elif chart_type == 'scatter':
         figure = generate_scatter_plot(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
-                                   (lowest_avg_vote, 10),
+                                   (lowest_avg_vote, highest_avg_vote),
                                    genre)
     elif chart_type == 'heatmap':
         figure = generate_heatmap(name, (group_attribute, target_attribute), country, (lowest_year, largest_year),
-                                  (lowest_avg_vote, 10),
+                                  (lowest_avg_vote, highest_avg_vote),
                                   genre)
     else:
-        figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, 10), genre)
+        figure = generate_table(name, country, (lowest_year, largest_year), (lowest_avg_vote, highest_avg_vote), genre)
     return figure
 
 
@@ -156,7 +157,6 @@ def generate_tab(label):
     return dbc.Tab(label=label, tab_id=label + "-tab")
 
 
-inputs = ["widget_name", "country", "genre", "lowest_avg_vote", "chart_type_dropdown"]
 widgets = []
 country_options = get_attributes("country")
 genre_options = get_attributes("genre")
@@ -184,11 +184,13 @@ filter_tab_div = html.Div([
     ),
     "Lowest Average Vote: ",
     dcc.Input(id='lowest_avg_vote', value='7', type='text'),
+    "Highest Average Vote: ",
+    dcc.Input(id='highest_avg_vote', value='10', type='text'),
     html.Br(),
     "Year: ",
     dcc.Input(id='lowest_year', value='2008', type='text'),
     "To",
-    dcc.Input(id='largest_year', value='2018', type='text'),
+    dcc.Input(id='largest_year', value='2021', type='text'),
     html.Br(),
     html.Br(),
     html.H4("Axes: "),
